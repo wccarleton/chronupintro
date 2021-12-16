@@ -1,4 +1,4 @@
-# Project
+# Chronological Uncertainty Propagation in REC Models
 ## Overview
 This repo contains the data and code used for the study presented in the following pre-print:
 

@@ -1,0 +1,394 @@
+---
+title: "Shrinkage in Bayesian Hierarchical Count Regression"
+output: pdf_document
+author: "W. Christopher Carleton"
+---
+
+# Shrinkage in Bayesian Hierarchical Models
+
+## Paths, Libraries, and Parameters
+
+```{r setup}
+datapath <- "../Data/"
+
+library(nimble)
+
+# vars for the counts
+nbins <- 100
+beta <- 0.04
+x <- 1:nbins
+lambda <- exp(beta * x)
+
+#parameters for mcmc
+niter <- 500000
+burnin <- 0.2
+retain <- floor(niter * burnin):niter
+nretain <- length(retain)
+```
+
+## Sample Count Sequences
+```{r sample-counts}
+sample_counts <- function(nil, n, lambda){
+    counts <- rpois(n = nbins,
+                lambda = lambda)
+    return(counts)
+}
+
+J <- 200
+
+Y <- sapply(1:J,
+            sample_counts,
+            n = nbins,
+            lambda = lambda)
+X <- matrix(rep(x,J), ncol = J)
+
+savepath <- paste(datapath,
+                "count_sequences.RData",
+                sep = "")
+```
+
+```{r nimble-model-def, message = F, warning = F}
+poisCode <- nimbleCode({
+   ###top-level regression
+   B0 ~ dnorm(0, 100)
+   B1 ~ dnorm(0, 100)
+   sigB0 ~ dunif(1e-10, 100)
+   sigB1 ~ dunif(1e-10, 100)
+   for (k in 1:J) {
+      ###low-level regression
+      b0[j] ~ dnorm(mean = B0, sd = sigB0)
+      b1[j] ~ dnorm(mean = B1, sd = sigB1)
+      for (n in 1:N){
+        r[n, j] <- exp(b0[k] + X[n, j] * b1[j])
+        Y[n, j] ~ dpois(lambda = r[n, j])
+      }
+   }
+})
+```
+
+```{r mcmc-5, message = F, warning = F}
+J <- 5
+
+poisData <- list(Y = Y[, 1:J],
+                X = X[, 1:J])
+
+poisConsts <- list(N = nbins,
+                J = J)
+
+poisInits <- list(B0 = 0,
+                B1 = 0,
+                b0 = rep(0, J),
+                b1 = rep(0, J),
+                sigB0 = 0.0001,
+                sigB1 = 0.0001)
+
+poisModel <- nimbleModel(code = poisCode,
+                        data = poisData,
+                        inits = poisInits,
+                        constants = poisConsts)
+
+#compile nimble model to C++ code—much faster runtime
+C_poisModel <- compileNimble(poisModel, showCompilerOutput = FALSE)
+
+#configure the MCMC
+poisModel_conf <- configureMCMC(poisModel)
+
+poisModel_conf$monitors <- c("B0", "B1", "sigB0", "sigB1")
+poisModel_conf$addMonitors2(c("b0", "b1"))
+
+#samplers
+poisModel_conf$removeSamplers(c("B0", "B1", "sigB0", "sigB1", "b0", "b1"))
+poisModel_conf$addSampler(target = c("B0", "B1", "sigB0", "sigB1"),
+                        type = "AF_slice")
+for(k in 1:J){
+   poisModel_conf$addSampler(target = c(paste("b0[", j, "]", sep = ""),
+                                    paste("b1[", j, "]", sep = "")),
+                        type = "AF_slice")
+}
+
+#thinning to conserve memory when the samples are saved below
+poisModel_conf$setThin(1)
+poisModel_conf$setThin2(1)
+
+#build MCMC
+poisModelMCMC <- buildMCMC(poisModel_conf)
+
+#compile MCMC to C++—much faster
+C_poisModelMCMC <- compileNimble(poisModelMCMC, project = poisModel)
+
+#set seed for replicability
+set.seed(1)
+
+#save the MCMC chain (monitored variables) as a matrix
+nimble_samples_5 <- runMCMC(C_poisModelMCMC, niter = niter)
+```
+
+```{r mcmc-10, include=FALSE}
+J <- 10
+
+poisData <- list(Y = Y[, 1:J],
+                X = X[, 1:J])
+
+poisConsts <- list(N = nbins,
+                J = J)
+
+poisInits <- list(B0 = 0,
+                B1 = 0,
+                b0 = rep(0, J),
+                b1 = rep(0, J),
+                sigB0 = 0.0001,
+                sigB1 = 0.0001)
+
+poisModel <- nimbleModel(code = poisCode,
+                        data = poisData,
+                        inits = poisInits,
+                        constants = poisConsts)
+
+#compile nimble model to C++ code—much faster runtime
+C_poisModel <- compileNimble(poisModel, showCompilerOutput = FALSE)
+
+#configure the MCMC
+poisModel_conf <- configureMCMC(poisModel)
+
+poisModel_conf$monitors <- c("B0", "B1", "sigB0", "sigB1")
+poisModel_conf$addMonitors2(c("b0", "b1"))
+
+#samplers
+poisModel_conf$removeSamplers(c("B0", "B1", "sigB0", "sigB1", "b0", "b1"))
+poisModel_conf$addSampler(target = c("B0", "B1", "sigB0", "sigB1"),
+                        type = "AF_slice")
+for(j in 1:J){
+   poisModel_conf$addSampler(target = c(paste("b0[", j, "]", sep = ""),
+                                    paste("b1[", j, "]", sep = "")),
+                        type = "AF_slice")
+}
+
+#thinning to conserve memory when the samples are saved below
+poisModel_conf$setThin(1)
+poisModel_conf$setThin2(1)
+
+#build MCMC
+poisModelMCMC <- buildMCMC(poisModel_conf)
+
+#compile MCMC to C++—much faster
+C_poisModelMCMC <- compileNimble(poisModelMCMC, project = poisModel)
+
+#set seed for replicability
+set.seed(1)
+
+#save the MCMC chain (monitored variables) as a matrix
+nimble_samples_10 <- runMCMC(C_poisModelMCMC, niter = niter)
+```
+
+```{r mcmc-20, include=FALSE}
+J <- 20
+
+poisData <- list(Y = Y[, 1:J],
+                X = X[, 1:J])
+
+poisConsts <- list(N = nbins,
+                J = J)
+
+poisInits <- list(B0 = 0,
+                B1 = 0,
+                b0 = rep(0, J),
+                b1 = rep(0, J),
+                sigB0 = 0.0001,
+                sigB1 = 0.0001)
+
+poisModel <- nimbleModel(code = poisCode,
+                        data = poisData,
+                        inits = poisInits,
+                        constants = poisConsts)
+
+#compile nimble model to C++ code—much faster runtime
+C_poisModel <- compileNimble(poisModel, showCompilerOutput = FALSE)
+
+#configure the MCMC
+poisModel_conf <- configureMCMC(poisModel)
+
+poisModel_conf$monitors <- c("B0", "B1", "sigB0", "sigB1")
+poisModel_conf$addMonitors2(c("b0", "b1"))
+
+#samplers
+poisModel_conf$removeSamplers(c("B0", "B1", "sigB0", "sigB1", "b0", "b1"))
+poisModel_conf$addSampler(target = c("B0", "B1", "sigB0", "sigB1"),
+                        type = "AF_slice")
+for(k in 1:J){
+   poisModel_conf$addSampler(target = c(paste("b0[", j, "]", sep = ""),
+                                    paste("b1[", j, "]", sep = "")),
+                        type = "AF_slice")
+}
+
+#thinning to conserve memory when the samples are saved below
+poisModel_conf$setThin(1)
+poisModel_conf$setThin2(1)
+
+#build MCMC
+poisModelMCMC <- buildMCMC(poisModel_conf)
+
+#compile MCMC to C++—much faster
+C_poisModelMCMC <- compileNimble(poisModelMCMC, project = poisModel)
+
+#set seed for replicability
+set.seed(1)
+
+#save the MCMC chain (monitored variables) as a matrix
+nimble_samples_20 <- runMCMC(C_poisModelMCMC, niter = niter)
+```
+
+```{r mcmc-50, include=FALSE}
+J <- 50
+
+poisData <- list(Y = Y[, 1:J],
+                X = X[, 1:J])
+
+poisConsts <- list(N = nbins,
+                J = J)
+
+poisInits <- list(B0 = 0,
+                B1 = 0,
+                b0 = rep(0, J),
+                b1 = rep(0, J),
+                sigB0 = 0.0001,
+                sigB1 = 0.0001)
+
+poisModel <- nimbleModel(code = poisCode,
+                        data = poisData,
+                        inits = poisInits,
+                        constants = poisConsts)
+
+#compile nimble model to C++ code—much faster runtime
+C_poisModel <- compileNimble(poisModel, showCompilerOutput = FALSE)
+
+#configure the MCMC
+poisModel_conf <- configureMCMC(poisModel)
+
+poisModel_conf$monitors <- c("B0", "B1", "sigB0", "sigB1")
+poisModel_conf$addMonitors2(c("b0", "b1"))
+
+#samplers
+poisModel_conf$removeSamplers(c("B0", "B1", "sigB0", "sigB1", "b0", "b1"))
+poisModel_conf$addSampler(target = c("B0", "B1", "sigB0", "sigB1"),
+                        type = "AF_slice")
+for(k in 1:J){
+   poisModel_conf$addSampler(target = c(paste("b0[", j, "]", sep = ""),
+                                    paste("b1[", j, "]", sep = "")),
+                        type = "AF_slice")
+}
+
+#thinning to conserve memory when the samples are saved below
+poisModel_conf$setThin(1)
+poisModel_conf$setThin2(1)
+
+#build MCMC
+poisModelMCMC <- buildMCMC(poisModel_conf)
+
+#compile MCMC to C++—much faster
+C_poisModelMCMC <- compileNimble(poisModelMCMC, project = poisModel)
+
+#set seed for replicability
+set.seed(1)
+
+#save the MCMC chain (monitored variables) as a matrix
+nimble_samples_50 <- runMCMC(C_poisModelMCMC, niter = niter)
+```
+
+```{r mcmc-100, include=FALSE}
+J <- 100
+
+poisData <- list(Y = Y[, 1:J],
+                X = X[, 1:J])
+
+poisConsts <- list(N = nbins,
+                J = J)
+
+poisInits <- list(B0 = 0,
+                B1 = 0,
+                b0 = rep(0, J),
+                b1 = rep(0, J),
+                sigB0 = 0.0001,
+                sigB1 = 0.0001)
+
+poisModel <- nimbleModel(code = poisCode,
+                        data = poisData,
+                        inits = poisInits,
+                        constants = poisConsts)
+
+#compile nimble model to C++ code—much faster runtime
+C_poisModel <- compileNimble(poisModel, showCompilerOutput = FALSE)
+
+#configure the MCMC
+poisModel_conf <- configureMCMC(poisModel)
+
+poisModel_conf$monitors <- c("B0", "B1", "sigB0", "sigB1")
+poisModel_conf$addMonitors2(c("b0", "b1"))
+
+#samplers
+poisModel_conf$removeSamplers(c("B0", "B1", "sigB0", "sigB1", "b0", "b1"))
+poisModel_conf$addSampler(target = c("B0", "B1", "sigB0", "sigB1"),
+                        type = "AF_slice")
+for(k in 1:J){
+   poisModel_conf$addSampler(target = c(paste("b0[", j, "]", sep = ""),
+                                    paste("b1[", j, "]", sep = "")),
+                        type = "AF_slice")
+}
+
+#thinning to conserve memory when the samples are saved below
+poisModel_conf$setThin(1)
+poisModel_conf$setThin2(1)
+
+#build MCMC
+poisModelMCMC <- buildMCMC(poisModel_conf)
+
+#compile MCMC to C++—much faster
+C_poisModelMCMC <- compileNimble(poisModelMCMC, project = poisModel)
+
+#set seed for replicability
+set.seed(1)
+
+#save the MCMC chain (monitored variables) as a matrix
+nimble_samples_100 <- runMCMC(C_poisModelMCMC, niter = niter)
+```
+
+## Plotting
+```{r setup-df}
+library(ggplot2)
+library(ggpubr)
+
+J_labels <- rep(c("5","10","50","100"), each = nretain)
+J_labels <- factor(J_labels, levels=c("5","10","50","100"))
+iterations <- rep(retain, 4)
+
+beta_samples <- c(nimble_samples_5$samples[retain, 2],
+                nimble_samples_10$samples[retain, 2],
+                nimble_samples_50$samples[retain, 2],
+                nimble_samples_100$samples[retain, 2])
+
+mcmc_samples_beta <- data.frame(model_run = J_labels,
+                            iteration = iterations,
+                            b = beta_samples)
+```
+
+```{r plot-mcmc-trace}
+ggplot(data = mcmc_samples_beta) +
+    geom_hline(yintercept = beta,
+                linetype = 2,
+                alpha = 0.8) +
+    geom_path(mapping = aes(y = b, x = iteration),
+                alpha = 0.85) +
+    facet_wrap(~ model_run, ncol = 2, scales = "free") +
+    theme_minimal()
+```
+
+```{r plot-mcmc-dens}
+ggplot(data = mcmc_samples_beta) +
+        geom_vline(xintercept = beta,
+                linetype = 2,
+                alpha = 0.8) +
+        geom_density(mapping = aes(y = ..scaled.., x = b, fill = model_run),
+                alpha = 0.5) +
+        scale_x_continuous(limits = c(0.0375, 0.044)) +
+        facet_wrap(~ model_run, ncol = 2, scales = "free") +
+        theme_minimal()
+```

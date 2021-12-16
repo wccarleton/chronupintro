@@ -1,7 +1,11 @@
 ---
 title: "Replication document for 'Propagating chronological uncertainty with Bayesian regression models'"
-output: pdf_document
-author: "W. Christopher Carleton"
+output:
+    pdf_document:
+        keep_tex: true
+author:
+    - W. Christopher Carleton^[Extreme Events Research Group, Max Planck Institutes for Chemical Ecology, Science of Human History, and Biogeochemistry, Jena Germany]
+    - Dave Campbell^[School of Mathematics and Statistics, Carleton University, Ottawa Canada]
 ---
 
 # Libraries
@@ -9,13 +13,27 @@ author: "W. Christopher Carleton"
 library(ggplot2)
 library(ggpubr)
 library(IntCal)
+library(coda)
 ```
 
 # Run this script?
-The analyses conducted using the code below can take a long time to run. On a desktop with 32 cores and 32G memory, the whole script required several hours to complete. So, when originally prepared, this code was run in chunks, outputs were saved, and then reloaded into the R workspace as needed for plotting results. This made it possible to disentangle code processing from minor changes to the wording or layout of this document. To facilitate that separation, a variable called `run_it` was used as a toggle and passed as an option to each R Markdown chunk below. When `run_it` is `TRUE`, the code runs. When false, it is assumed that certain results (big matrices and R objects) are already in the R workspace. The toggle does not apply to code chunks used for plotting. On first running this replication script, you will need to set the toggle below to `TRUE`.
+The analyses conducted using the code below can take a long time to run. On a desktop with 32 cores and 32G memory, the whole script required several hours to complete. So, when originally prepared, this code was run in chunks, outputs were saved, and then reloaded into the R workspace as needed for plotting results. This made it possible to disentangle code processing from minor changes to the wording or layout of this document.
+
+To facilitate that separation, a set of variables beginning with `run_it_*` were used as toggles and passed as an option to each R Markdown chunk below. When a `run_it_*` is `TRUE`, the code in the relevant chunk runs. When false, it is assumed that certain results (big matrices and R objects) are already in the R workspace and or can be loaded by the relevant code chunk. The toggles include code chunks used for plotting and each MCMC analysis has been separated. On first running this replication script, you will need to set all of these toggles to `TRUE` in order to fully replicate the analysis described in the paper associated with this document.
 
 ```{r, toggle}
-run_it = F
+run_it_simdata_pre = F
+run_it_simdata_chronup = F
+run_it_mcmc = c(F,  #J=5
+                F,  #J=10
+                F,  #J=50
+                F,  #J=100
+                F)  #chronup
+run_it_plot = T
+run_it_simdata_big = F
+run_it_mcmc_big = c(F, #J=50
+                    F) #chronup
+run_it_plot_big = T
 ```
 
 ## Directory structure
@@ -37,7 +55,7 @@ As described in the associated paper, the simulation process is based on a Poiss
 
 To produce samples from this process while simulating the effect of chronological uncertainty, we need to set several parameters. These include the number of desired intervals in the sequence ($tau$), the total number of events in the sequence ($n$), a regression coefficient ($\beta$), covariate sequence ($x$), and start and end times for the count sequence chronology. For the sake of simplicity, we will assume that the time dimension is measured using a Before Present (BP) system and that the intervals correspond to years. As a result, the passage of time in the analysis that follows corresponds with decreasing age (a given number of years before the present).
 
-```{r, set-globals, eval=run_it}
+```{r, set-globals}
 nevents <- 1000
 tau <- 1000
 beta <- 0.004
@@ -48,7 +66,7 @@ end <- (start - tau) + 1
 
 With these parameters set, we can calculate the conditional mean for the Poisson process. We will then randomly sample $n$ ages from $[start, end]$ where the probability of sampling any given age in that range corresponds to the conditional mean function. This can be accomplished by passing the mean function evaluated at a discrete evenly-spaced set of times to R's built-in `sample()` function. Then, we can use the built-in `graphics::hist()` function to bin the sampled ages into a count sequence with the help of the `breaks` argument to define the temporal bin edges.
 
-```{r, simulate-counts, eval=run_it}
+```{r, simulate-counts, eval=run_it_simdata_pre}
 lambda <- exp(beta * x)
 pois_process <- data.frame(lambda = lambda)
 ages <- sample(x = start:end,
@@ -71,7 +89,7 @@ save(simdata,
 
 Just to be certain that the sample looks sensible, plot the sample along with the underlying process (conditional Poisson mean).
 
-```{r, plot-simdata}
+```{r, plot-simdata, eval=run_it_plot}
 load(paste(datapath,
             "simdata.RData",
             sep = ""))
@@ -90,7 +108,7 @@ ggarrange(p1,
 
 We can also quickly check to see whether the sample size is sufficient to estimate $\beta$ by running a simple Poisson regression with R's `glm()` function.
 
-```{r, glm-check}
+```{r, glm-check, eval=run_it_plot}
 glm_check <- glm(y~x,
                 data = simdata,
                 family = "poisson")
@@ -102,7 +120,7 @@ Adding chronological uncertainty to the simulated data could be done in many way
 
 To begin, pass the sampled ages from above to the IntCal packages's `calBP.14C` function. The function returns plausible C14 determinations (ages in uncalibrated radiocarbon years before present) given a set of calendar ages (the ages we sampled). These simulated C14 ages must then be calibrated and can be stored conveniently in a chronological uncertainty matrix called `chronun_matrix`. In order to align the calibrated date densities (discrete estimates provided by calibration software) for storage in the matrix, we also need to determine the maximum span of time (`sample_time_range`) covered by all the simulated sample dates. Lastly, the range of times corresponding to that enclosing interval can be stored in a vector separate from the `chronun_matrix` for use later on. The following code accomplishes all of these steps.
 
-```{r, c14-uncertainty, eval=run_it}
+```{r, c14-uncertainty, eval=run_it_simdata_pre}
 simc14 <- t(sapply(ages, IntCal::calBP.14C))
 
 c14post <- lapply(1:nevents,
@@ -130,7 +148,7 @@ chronun_matrix[which(is.na(chronun_matrix))] <- 0
 
 Next, the `chronun_matrix` is used to create an `event_count_ensemble`. The ensemble is just a sample of probable event counts given the radiocarbon dating uncertainty we just simulated. Each member of the ensemble (one probable count sequence) will be stored as a column in a matrix. Since we want to create a large ensemble, two small functions will be required. One function will sample the `chronun_matrix` for a probable set of event ages and the other will count those events, binning them into a probable count sequence with the given resolution (defined by temporal bin edges passed as the `breaks` argument to the `graphics::hist()` function used earlier).
 
-```{r, helpers, eval=run_it}
+```{r, helpers, eval=run_it_simdata_pre}
 # first function - sample event times
 sample_event_times <- function(x = NULL,
                                 chronun_matrix,
@@ -157,7 +175,7 @@ breaks <- seq(from = start, to = end, by = -1)
 
 With the helpful functions in hand, sample 1000 probable event ages:
 
-```{r, sample-ages, eval=run_it}
+```{r, sample-ages, eval=run_it_simdata_pre}
 event_time_sample <- sapply(1:1000,
                         sample_event_times,
                         chronun_matrix = chronun_matrix,
@@ -166,7 +184,7 @@ event_time_sample <- sapply(1:1000,
 
 And, then, compile the count sequences:
 
-```{r, count-ensemble, eval=run_it}
+```{r, count-ensemble, eval=run_it_simdata_pre}
 event_count_ensemble <- apply(event_time_sample,
                             2,
                             count_events,
@@ -175,13 +193,22 @@ save(event_count_ensemble,
     file = paste(datapath,
                 "count_ensemble_1.RData",
                 sep = ""))
+
+save(expanded_times,
+    file = paste(datapath,
+                "count_ensemble_1_expanded_times.RData",
+                sep = ""))
 ```
 
 As before, it's a good idea to plot some of the sequences to make sure they are as they should be (increasing with the passage of time in a roughly exponential-looking way). To help keep variable names to a reasonable length, we can refer to any event count ensemble as an `ece` and if the events in question are radiocarbon dated we can use `rece` (radiocarbon-dated event count ensemble).
 
-```{r, plot-rece}
+```{r, plot-rece, eval=run_it_plot}
 load(paste(datapath,
             "count_ensemble_1.RData",
+            sep = ""))
+
+load(paste(datapath,
+            "count_ensemble_1_expanded_times.RData",
             sep = ""))
 
 rece <- data.frame(timestamps = expanded_times,
@@ -219,7 +246,7 @@ install_github("wccarleton/chronup")
 
 As before, we can define some key parameters to begin. In addition to the same ones defined above, a new parameter called `nsamples` will determine how many probable event count sequences to create.
 
-```{r, globals-again, eval=run_it}
+```{r, globals-again}
 nevents <- 1000
 nsamples <- 200000
 tau <- 1000
@@ -233,7 +260,7 @@ times <- start:end
 
 With these parameters set, one function call to `chronup::simulate_event_counts` will produce 200,000 probable event count sequences assuming radiocarbon-dated uncertainties:
 
-```{r, chronup-simdata, eval=run_it}
+```{r, chronup-simdata, eval=run_it_simdata_chronup}
 simdata2 <- chronup::simulate_event_counts(process = lambda,
                                             times = times,
                                             nevents = nevents,
@@ -242,15 +269,15 @@ simdata2 <- chronup::simulate_event_counts(process = lambda,
                                             bigmatrix = datapath)
 save(simdata2,
     file = paste(datapath,
-                "./simdata2.RData",
+                "simdata2.RData",
                 sep = ""))
 ```
 
-The `chronup` package also includes a convenient way to plot a `rece` or count ensemble. To speed up the plotting process, we will plot only a subset of the 200,000 probable sequences. Since the ensemble has been stored in a big memory matrix, we will first have to attach that matrix. The path to the matrix is stored as an element in the `simdata2` object (`simdata$count_ensemble`).
+The `chronup` package also includes a convenient way to plot a `rece` or count ensemble. To speed up the plotting process, we will plot only a subset of the probable sequences. Since the ensemble has been stored in a big memory matrix, we will first have to attach that matrix. The path to the matrix is stored as an element in the `simdata2` object (`simdata$count_ensemble`).
 
-```{r, chronup-plot}
+```{r, chronup-plot, eval=run_it_plot}
 load(paste(datapath,
-        "./simdata2.RData",
+        "simdata2.RData",
         sep = ""))
 
 rece <- bigmemory::attach.big.matrix(simdata2$count_ensemble)
@@ -272,7 +299,7 @@ It should be noted that since the span of time occupied by the RECE samples is l
 
 To begin, establish a bigmatrix object to hold the covariate samples. The matrix will have the same number of rows as the RECE matrix and twice the number of columns. We are using twice the number of columns in order to include an intercept in the model, which will simply be a column of `1`'s. As the MCMC proceeds, columns from the independent variable matrix (`X`) will be selected two at a time to account for the intercept.
 
-```{r, x-bigmat, eval=run_it}
+```{r, x-bigmat, eval=run_it_simdata_chronup}
 X <- bigmemory::filebacked.big.matrix(
                     nrow = dim(rece)[1],
                     ncol = dim(rece)[2] * 2,
@@ -285,7 +312,7 @@ X_loc <- bigmemory::describe(X)
 
 For each observation in the covariate sequence, we add a random deviation and then store the result in the `X` matrix. We can make use of parallelization and a progress bar to speed up this process and monitor it. Note that in order to preserve the temporal scale and obtain estimates of `beta` at the correct scale, we have to multiply the time indeces by the resolution of the temporal bins, which means multiplying in this case by 10. Likewise, it is important to note that the uncertainty we wish to introduce into the covariate would need to be scaled accordingly to ensure that a sensible level of uncertainty is being included. For simplicity, we will use a standard deviation 2, which corresponds to 20 years at the original temporal resolution of the simulated data. In a real-world analysis, forgetting to account for the temporal width of the bins can lead to scaled parameter estimates. The estimates would be a multiple of the temporal resolution in the case of a regression coefficient referring only to the passage of time. Correcting the scale after obtaining parameter estimates would involve dividing those estimates by the temporal resolution of the bins, but here we can avoid the problem by scaling appropriately at the outset.
 
-```{r, x-uncertainty, eval=run_it}
+```{r, x-uncertainty, eval=run_it_simdata_chronup}
 library(pbapply)
 library(parallel)
 
@@ -316,14 +343,31 @@ pbsapply(cl = cl,
 
 stopCluster(cl)
 ```
-# Regression with chronological uncertainty propagation
-Recently, attempts have been made to propagate chronological uncertainty in Palaeo Science statistical analyses. As described in the paper associated with this replication document, these recent attempts have involved a hierarchical arrangement of parameters in count-based regression models. In this section, we run one of these analyses on the data simulated above and then explore an alternate approach using the same data.
+# Accounting for chronological uncertainty in regression
+Recently, attempts have been made to handle chronological uncertainty in Palaeo Science regression analyses. As described in the paper associated with this replication document, these recent attempts have involved a hierarchical arrangement of parameters in count-based regression models. In this section, we run one of these analyses on the data simulated above and then explore an alternate approach using the same data.
 
 ## Hierarchical arrangement
-For the hierarchical model, we use a powerful Bayesian R package called [Nimble](https://r-nimble.org/). Nimble is a system for creating Bayesian models and estimating model parameters with a flexible, sophisticated MCMC engine. The core of Nimble model specification is based on an older language for writing Bayesian models called "BUGS". The first step is to write the model using a Nimble R function and Nimble's slightly adapted BUGS language. Then, the model definition along with other important variables are used to create a Nimble model object, which is subsequently passed to Nimble's MCMC engine (after MCMC settings are established). Nimble allows for all of the relevant R code and objects to be compiled to C++, which massively reduces computation times. The following code is used to create a hierarchical model in Nimble and run an MCMC given the data simulated above.
+For the hierarchical model, we use a Bayesian R package called [Nimble](https://r-nimble.org/). Nimble is a system for creating Bayesian models and estimating model parameters with a flexible, sophisticated MCMC engine. The core of Nimble model specification is based on an older language for writing Bayesian models called "BUGS". The first step is to write the model using a Nimble R function and Nimble's slightly adapted BUGS language. Then, the model definition along with other important variables are used to create a Nimble model object, which is subsequently passed to Nimble's MCMC engine (after MCMC settings are established). Nimble allows for all of the relevant R code and objects to be compiled to C++, which massively reduces computation times.
 
-```{r, nimble-model, eval=run_it}
+The following code is used to create a hierarchical model in Nimble and run an MCMC given the data simulated above,
+
+<!-- The following block checks to see if any run_it_mcmc is TRUE so that the subsequent two blocks will be activated to load the data needed for all/any relevant MCMCs and setup the required Nimble model -->
+
+```{r, check_runit, include=F}
+run_it_nimble <- any(run_it_mcmc)
+```
+
+```{r, nimble-model, eval=run_it_nimble}
 library(nimble)
+
+load(paste(datapath,
+        "simdata2.RData",
+        sep = ""))
+
+rece <- bigmemory::attach.big.matrix(simdata2$count_ensemble)
+X <- bigmemory::attach.big.matrix(paste(datapath,
+                                "X_mat_desc",
+                                sep = ""))
 
 nbCode <- nimbleCode({
    ###top-level regression
@@ -331,35 +375,66 @@ nbCode <- nimbleCode({
    B1 ~ dnorm(0, 100)
    sigB0 ~ dunif(1e-10, 100)
    sigB1 ~ dunif(1e-10, 100)
-   for (k in 1:K) {
+   for (j in 1:J) {
       ###low-level regression
-      b0[k] ~ dnorm(mean = B0, sd = sigB0)
-      b1[k] ~ dnorm(mean = B1, sd = sigB1)
+      b0[j] ~ dnorm(mean = B0, sd = sigB0)
+      b1[j] ~ dnorm(mean = B1, sd = sigB1)
       for (n in 1:N){
-        p[n, k] ~ dunif(1e-10, 1)
-        r[n, k] <- exp(b0[k] + X[n, k] * b1[k])
-        Y[n, k] ~ dnegbin(size = r[n, k], prob = p[n, k])
+        p[n, j] ~ dunif(1e-10, 1)
+        r[n, j] <- exp(b0[j] + X[n, j] * b1[j])
+        Y[n, j] ~ dnegbin(size = r[n, j], prob = p[n, j])
       }
    }
 })
 ```
 
-```{r, nimble-mcmc, eval=run_it}
+With the Nimble model defined, sample the data matrices, setup the MCMC, and run it. First, we will create a vector (`span_index`) for subsetting the data to the interval of time covered by the simlations process (i.e., 5000:4001 BP). We will also use Nimble's slice samplers for the sub-regressions (probable regressions at the lower level of the hierarchy) to improve the sampling of the model posteriors and then run the MCMC for at least `niter = 1000000` iterations (thinned to retain only every 10th sample). Some of these MCMC parameters can be set up globally, while others have to be established again for each new MCMC run because of the way Nimble compiles code to C++, as described earlier. The global parameters are,
+
+```{r, nimble-globals, eval=run_it_nimble}
 span_index <- which(simdata2$new_timestamps <= start &
                     simdata2$new_timestamps >= end)
 n <- length(span_index)
-K = 50
 
-nbData <- list(Y = rece[span_index, 1:K],
-                X = X[span_index, 1:K])
+#number of MCMC iterations
+niter <- 1000000
+
+#thinning to save space
+thinning <- 10
+
+#set seed for replicability
+set.seed(1)
+```
+
+To explore the impact of the size of the sample of probable sequences on the posterior density estimates, we will run 4 separate MCMC simulations: one simulation for each of $J \in [5, 10, 50, 100]$. Only the code for the first of these---`J = 5`---is printed in the PDF/md document produced by this script, but the code for each is in the script below.
+
+Importantly, we need to select the J draws from the RECE and the corresponding J draws from the matrix containing the covariate (X) values with uncertainty added in. The J RECE columns will be randomly sampled without replacement (they are already a random sample of probable count sequences and we do not want to select a given sequence more than once). For the 'X' matrix, we need to select every other column, though, because that matrix contains alternating columns of 1's representing the model intercept and covariate values. The intercept is included in the Nimble model specification internally, and so needs to be excluded from the covariate matrix.
+
+The code for the MCMC involving `J = 5` probable sequences (and matching covariate sequences) is as follows,
+
+<!-- J=5 -->
+```{r, nimble-mcmc5, eval=run_it_mcmc[1], include=T}
+span_index <- which(simdata2$new_timestamps <= start &
+                    simdata2$new_timestamps >= end)
+n <- length(span_index)
+J = 5
+
+y_sample <- sample(1:dim(rece)[2],
+                size = J,
+                replace = F)
+x_sample <- sample(seq(2, dim(rece)[2], 2),
+                size = J,
+                replace = F)
+
+nbData <- list(Y = rece[span_index, y_sample],
+                X = X[span_index, x_sample])
 
 nbConsts <- list(N = n,
-                K = K)
+                J = J)
 
 nbInits <- list(B0 = 0,
                 B1 = 0,
-                b0 = rep(0, K),
-                b1 = rep(0, K),
+                b0 = rep(0, J),
+                b1 = rep(0, J),
                 sigB0 = 0.0001,
                 sigB1 = 0.0001)
 
@@ -381,15 +456,15 @@ nbModel_conf$addMonitors2(c("b0", "b1"))
 nbModel_conf$removeSamplers(c("B0", "B1", "sigB0", "sigB1", "b0", "b1"))
 nbModel_conf$addSampler(target = c("B0", "B1", "sigB0", "sigB1"),
                         type = "AF_slice")
-for(k in 1:K){
-   nbModel_conf$addSampler(target = c(paste("b0[", k, "]", sep = ""),
-                                    paste("b1[", k, "]", sep = "")),
+for(j in 1:J){
+   nbModel_conf$addSampler(target = c(paste("b0[", j, "]", sep = ""),
+                                    paste("b1[", j, "]", sep = "")),
                         type = "AF_slice")
 }
 
 #thinning to conserve memory when the samples are saved below
-nbModel_conf$setThin(1)
-nbModel_conf$setThin2(1)
+nbModel_conf$setThin(thinning)
+nbModel_conf$setThin2(thinning)
 
 #build MCMC
 nbModelMCMC <- buildMCMC(nbModel_conf)
@@ -397,26 +472,236 @@ nbModelMCMC <- buildMCMC(nbModel_conf)
 #compile MCMC to C++—much faster
 C_nbModelMCMC <- compileNimble(nbModelMCMC, project = nbModel)
 
-#number of MCMC iterations
-niter=200000
-
-#set seed for replicability
-set.seed(1)
-
 #save the MCMC chain (monitored variables) as a matrix
-nimble_samples <- runMCMC(C_nbModelMCMC, niter = niter)
+nimble_samples_5 <- runMCMC(C_nbModelMCMC, niter = niter)
 
 #save samples
-save(nimble_samples,
+save(nimble_samples_5,
         file = paste(datapath,
-                    "mcmc_samples_nimble.RData",
+                    "mcmc_samples_nimble_5.RData",
+                    sep = ""))
+```
+
+<!-- J=10 -->
+```{r, nimble-mcmc10, eval=run_it_mcmc[2], include=FALSE}
+span_index <- which(simdata2$new_timestamps <= start &
+                    simdata2$new_timestamps >= end)
+n <- length(span_index)
+J = 10
+
+y_sample <- sample(1:dim(rece)[2],
+                size = J,
+                replace = F)
+x_sample <- sample(seq(2, dim(rece)[2], 2),
+                size = J,
+                replace = F)
+
+nbData <- list(Y = rece[span_index, y_sample],
+                X = X[span_index, x_sample])
+
+nbConsts <- list(N = n,
+                J = J)
+
+nbInits <- list(B0 = 0,
+                B1 = 0,
+                b0 = rep(0, J),
+                b1 = rep(0, J),
+                sigB0 = 0.0001,
+                sigB1 = 0.0001)
+
+nbModel <- nimbleModel(code = nbCode,
+                        data = nbData,
+                        inits = nbInits,
+                        constants = nbConsts)
+
+#compile nimble model to C++ code—much faster runtime
+C_nbModel <- compileNimble(nbModel, showCompilerOutput = FALSE)
+
+#configure the MCMC
+nbModel_conf <- configureMCMC(nbModel)
+
+nbModel_conf$monitors <- c("B0", "B1", "sigB0", "sigB1")
+nbModel_conf$addMonitors2(c("b0", "b1"))
+
+#samplers
+nbModel_conf$removeSamplers(c("B0", "B1", "sigB0", "sigB1", "b0", "b1"))
+nbModel_conf$addSampler(target = c("B0", "B1", "sigB0", "sigB1"),
+                        type = "AF_slice")
+for(j in 1:J){
+   nbModel_conf$addSampler(target = c(paste("b0[", j, "]", sep = ""),
+                                    paste("b1[", j, "]", sep = "")),
+                        type = "AF_slice")
+}
+
+#thinning to conserve memory when the samples are saved below
+nbModel_conf$setThin(thinning)
+nbModel_conf$setThin2(thinning)
+
+#build MCMC
+nbModelMCMC <- buildMCMC(nbModel_conf)
+
+#compile MCMC to C++—much faster
+C_nbModelMCMC <- compileNimble(nbModelMCMC, project = nbModel)
+
+#save the MCMC chain (monitored variables) as a matrix
+nimble_samples_10 <- runMCMC(C_nbModelMCMC, niter = niter)
+
+#save samples
+save(nimble_samples_10,
+        file = paste(datapath,
+                    "mcmc_samples_nimble_10.RData",
+                    sep = ""))
+```
+
+<!-- J=50 -->
+```{r, nimble-mcmc50, eval=run_it_mcmc[3]}
+span_index <- which(simdata2$new_timestamps <= start &
+                    simdata2$new_timestamps >= end)
+n <- length(span_index)
+J = 50
+
+y_sample <- sample(1:dim(rece)[2],
+                size = J,
+                replace = F)
+x_sample <- sample(seq(2, dim(rece)[2], 2),
+                size = J,
+                replace = F)
+
+nbData <- list(Y = rece[span_index, y_sample],
+                X = X[span_index, x_sample])
+
+nbConsts <- list(N = n,
+                J = J)
+
+nbInits <- list(B0 = 0,
+                B1 = 0,
+                b0 = rep(0, J),
+                b1 = rep(0, J),
+                sigB0 = 0.0001,
+                sigB1 = 0.0001)
+
+nbModel <- nimbleModel(code = nbCode,
+                        data = nbData,
+                        inits = nbInits,
+                        constants = nbConsts)
+
+#compile nimble model to C++ code—much faster runtime
+C_nbModel <- compileNimble(nbModel, showCompilerOutput = FALSE)
+
+#configure the MCMC
+nbModel_conf <- configureMCMC(nbModel)
+
+nbModel_conf$monitors <- c("B0", "B1", "sigB0", "sigB1")
+nbModel_conf$addMonitors2(c("b0", "b1"))
+
+#samplers
+nbModel_conf$removeSamplers(c("B0", "B1", "sigB0", "sigB1", "b0", "b1"))
+nbModel_conf$addSampler(target = c("B0", "B1", "sigB0", "sigB1"),
+                        type = "AF_slice")
+for(j in 1:J){
+   nbModel_conf$addSampler(target = c(paste("b0[", j, "]", sep = ""),
+                                    paste("b1[", j, "]", sep = "")),
+                        type = "AF_slice")
+}
+
+#thinning to conserve memory when the samples are saved below
+nbModel_conf$setThin(thinning)
+nbModel_conf$setThin2(thinning)
+
+#build MCMC
+nbModelMCMC <- buildMCMC(nbModel_conf)
+
+#compile MCMC to C++—much faster
+C_nbModelMCMC <- compileNimble(nbModelMCMC, project = nbModel)
+
+#save the MCMC chain (monitored variables) as a matrix
+nimble_samples_50 <- runMCMC(C_nbModelMCMC, niter = niter)
+
+#save samples
+save(nimble_samples_50,
+        file = paste(datapath,
+                    "mcmc_samples_nimble_50.RData",
+                    sep = ""))
+```
+
+<!-- J=100 -->
+```{r, nimble-mcmc100, eval=run_it_mcmc[4], include=FALSE}
+span_index <- which(simdata2$new_timestamps <= start &
+                    simdata2$new_timestamps >= end)
+n <- length(span_index)
+J = 100
+
+y_sample <- sample(1:dim(rece)[2],
+                size = J,
+                replace = F)
+x_sample <- sample(seq(2, dim(rece)[2], 2),
+                size = J,
+                replace = F)
+
+nbData <- list(Y = rece[span_index, y_sample],
+                X = X[span_index, x_sample])
+
+nbConsts <- list(N = n,
+                J = J)
+
+nbInits <- list(B0 = 0,
+                B1 = 0,
+                b0 = rep(0, J),
+                b1 = rep(0, J),
+                sigB0 = 0.0001,
+                sigB1 = 0.0001)
+
+nbModel <- nimbleModel(code = nbCode,
+                        data = nbData,
+                        inits = nbInits,
+                        constants = nbConsts)
+
+#compile nimble model to C++ code—much faster runtime
+C_nbModel <- compileNimble(nbModel, showCompilerOutput = FALSE)
+
+#configure the MCMC
+nbModel_conf <- configureMCMC(nbModel)
+
+nbModel_conf$monitors <- c("B0", "B1", "sigB0", "sigB1")
+nbModel_conf$addMonitors2(c("b0", "b1"))
+
+#samplers
+nbModel_conf$removeSamplers(c("B0", "B1", "sigB0", "sigB1", "b0", "b1"))
+nbModel_conf$addSampler(target = c("B0", "B1", "sigB0", "sigB1"),
+                        type = "AF_slice")
+for(j in 1:J){
+   nbModel_conf$addSampler(target = c(paste("b0[", j, "]", sep = ""),
+                                    paste("b1[", j, "]", sep = "")),
+                        type = "AF_slice")
+}
+
+#thinning to conserve memory when the samples are saved below
+nbModel_conf$setThin(thinning)
+nbModel_conf$setThin2(thinning)
+
+#build MCMC
+nbModelMCMC <- buildMCMC(nbModel_conf)
+
+#compile MCMC to C++—much faster
+C_nbModelMCMC <- compileNimble(nbModelMCMC, project = nbModel)
+
+#save the MCMC chain (monitored variables) as a matrix
+nimble_samples_100 <- runMCMC(C_nbModelMCMC, niter = niter)
+
+#save samples
+save(nimble_samples_100,
+        file = paste(datapath,
+                    "mcmc_samples_nimble_200.RData",
                     sep = ""))
 ```
 
 ## Alternative with `chronup`
 Next, we can use a regression function from the `chronup` package to perform another count-based regression on these simulated data while propagating the uncertainty in the data up to the posterior estimates of the model's parameters. In this case, though, the parameters are not hierarchically arranged as they were for the Nimble analysis.
 
-```{r, chronup-model, eval=run_it}
+```{r, chronup-model, eval=run_it_mcmc[5]}
+span_index <- which(simdata2$new_timestamps <= start &
+                    simdata2$new_timestamps >= end)
+
 startvals <- c(0, 0, rep(0.1, 100))
 startscales <- c(0.1, 0.0002, rep(0.5, 100))
 
@@ -455,45 +740,404 @@ save(chronup_samples,
 ## Comparing results
 Finally, we can compare the results of the two approaches. The key parameter of interest is `beta`. It is the main regression coefficient in the models and represents the rate of the conditional counting process. In a practical case, it would indicate the growth rate (or, conversely, decay rate) of whatever process produced concentrations of radiocarbon samples in the sediments excavated during a Palaeo Science research project. If covariates other than time are involved, the regression coefficients would reflect the impact of those covariates on that growth/decay rate.
 
-To see clearly how the two different approaches perform, we will compare density estimates based on the posterior samples from the two MCMC simulations. Using the following code, a side-by-side comparison can be plotted with the help of `ggplot2`. First, though, we will combine the samples into a single long dataframe. We will also discard the first 10,000 samples from each as burn-in.
+To see clearly how the two different approaches perform, we will compare density estimates based on the posterior samples from the various MCMC simulations. Using the following code, a side-by-side comparison can be plotted with the help of `ggplot2`. First, though, we will combine the samples into a single long dataframe. We will also discard the first 10\% of samples from each as burn-in and scale the density estimates to a maximum of one to make visual comparisons easier. Initially, plot the densities without any x-axis constraints, but then produce the same plot again with the x-axis limits set to focus on the area around the target parameter estimate to facilitate comparison.
 
-```{r plot-mcmc-densities}
+```{r plot-mcmc-densities, eval=run_it_plot}
 load(paste(datapath,
-            "mcmc_samples_nimble.RData",
+            "mcmc_samples_nimble_5.RData",
+            sep = ""))
+load(paste(datapath,
+            "mcmc_samples_nimble_10.RData",
+            sep = ""))
+load(paste(datapath,
+            "mcmc_samples_nimble_50.RData",
+            sep = ""))
+load(paste(datapath,
+            "mcmc_samples_nimble_100.RData",
             sep = ""))
 load(paste(datapath,
             "mcmc_samples_chronup.RData",
             sep = ""))
 
-n_hier <- dim(nimble_samples$samples)[1]
+n_hier <- dim(nimble_samples_5$samples)[1]
 n_alt <- dim(chronup_samples)[1]
 
-burnin_hier <- floor(n_hier * 0.25)
-burnin_alt <- floor(n_alt * 0.25)
+burnin_hier <- floor(n_hier * 0.1)
+burnin_alt <- floor(n_alt * 0.1)
 
 iteration_hier <- (burnin_hier + 1):n_hier
+iteration_hier_all <- rep(iteration_hier, 4)
 iteration_alt <- (burnin_alt + 1):n_alt
 
-n_retained_heir <- length(iteration_hier)
+n_retained_hier <- length(iteration_hier)
 n_retained_alt <- length(iteration_alt)
 
-plot_samples_hier <- nimble_samples$samples[iteration_hier, 2]
+plot_samples_hier_5 <- nimble_samples_5$samples[iteration_hier, 2]
+plot_samples_hier_10 <- nimble_samples_10$samples[iteration_hier, 2]
+plot_samples_hier_50 <- nimble_samples_50$samples[iteration_hier, 2]
+plot_samples_hier_100 <- nimble_samples_100$samples[iteration_hier, 2]
+plot_samples_hier <- c(plot_samples_hier_5,
+                    plot_samples_hier_10,
+                    plot_samples_hier_50,
+                    plot_samples_hier_100)
 plot_samples_alt <- chronup_samples[iteration_alt, 2]
 
-model_name_hier <- rep("hier", n_retained_heir)
+model_name_hier <- rep("hier", n_retained_hier * 4)
 model_name_alt <- rep("alt", n_retained_alt)
 
-mcmc_samples_both <- data.frame(Iteration = c(iteration_hier, iteration_alt),
-                            Model = c(model_name_hier, model_name_alt),
-                            Beta = c(plot_samples_hier, plot_samples_alt))
+J_hier <- rep(c("5", "10", "50", "100"), each = n_retained_hier)
+J_alt <- rep("200000", n_retained_alt)
+
+J_both <- factor(c(J_hier, J_alt), levels = c("5", "10", "50", "100", "200000"))
+
+mcmc_samples_both <- data.frame(Iteration = c(iteration_hier_all,
+                                            iteration_alt),
+                            Model = c(model_name_hier,
+                                    model_name_alt),
+                            J = J_both,
+                            Beta = c(plot_samples_hier,
+                                    plot_samples_alt))
 
 ggplot(data = mcmc_samples_both) +
     geom_vline(xintercept = beta,
                 linetype = 2,
                 alpha = 0.8) +
-    geom_density(mapping = aes(x = Beta, fill = Model),
+    geom_density(mapping = aes(y = ..scaled.., x = Beta),
+                fill = "steelblue",
                 alpha = 0.5) +
+    facet_wrap(~ J, ncol = 2, scales = "free") +
     theme_minimal()
 ```
 
-As the plot shows, both methods yielded estimates for `beta` that include the true value (0.004, indicated by the vertical dashed line) within their 99% and/or 95% credible intervals. But, the hierarchical model (`heir` in the plot legend) produced a posterior density estimate with a much lower variance than the alternate method. This is because the alternate method has propagated more of the chronological uncertainty into the posterior density than the hierarchical approach.
+To make comparisons easier, we can re-produce the same plot, but this time limit the x-axis to a region around the target value for $\beta$ and align the plot axes:
+
+```{r plot-mcmc-densities2, eval=run_it_plot}
+ggplot(data = mcmc_samples_both) +
+    geom_vline(xintercept = beta,
+                linetype = 2,
+                alpha = 0.8) +
+    geom_density(mapping = aes(y = ..scaled.., x = Beta),
+                fill = "steelblue",
+                alpha = 0.5) +
+    facet_wrap(~ J, ncol = 2, scales = "free") +
+    scale_x_continuous(limits = c(0.001, 0.007)) +
+    theme_minimal()
+```
+
+Lastly, we should also inspect the mcmc trace plots for each model/estimate, and then check the Geweke statistics for the main parameters,
+
+```{r plot-mcmc-trace, eval=run_it_plot}
+ggplot(data = mcmc_samples_both) +
+    geom_hline(yintercept = beta,
+                linetype = 2,
+                alpha = 0.8) +
+    geom_path(mapping = aes(y = Beta, x = Iteration),
+                alpha = 0.85) +
+    facet_wrap(~ J, ncol = 2, scales = "free") +
+    theme_minimal()
+
+geweke.diag(cbind(plot_samples_hier_5,
+                plot_samples_hier_10,
+                plot_samples_hier_50,
+                plot_samples_hier_100,
+                plot_samples_alt))
+```
+
+As the plots show, both methods yielded estimates for `beta` that either include the true value (0.004, indicated by the vertical dashed line) within their 99% and/or 95% credible intervals or are at least quite close. But, the hierarchical model (`heir` in the plot legend) produced posterior density estimates with a much lower variance than the alternate method and can occasionally exclude the target value when large samples of probable sequences are involved (i.e., `J` is large).
+
+## Sample Size
+A feature of hierarchical models is that they allow for borrowing of information across samples. This leads to a phenomenon sometimes called "shrinkage" whereby the variance in the posterior density for model parameters tends to be smaller than the variance of the same parameters estimated separately for each data sample. This appears to be happening with the posteriors of the hierarchical REC model estimated in Nimble. And, as the size of the sample (i.e., `J`, referring to the number of probable count sequences analyzed) increases, the variance of the posterior densities decreases, as shown in the plots above. A bias is being introduced because a single $\beta$ parameter is being used to estimate the likelihoods of all `J` probable regression models simultaneously, which results in the estimates for $\beta_j$ being pulled together. This convergence, in turn, leads to a lower variance in the upper level hyperparameter for $\beta$'s mean. Any lingering bias in the underlying event sample, though, will cause that mean estimate to deviate from the true underlying value. Subsequently, the hyperparameter estimate for the target value will be a slightly biased, but high-precision estimate.
+
+To see the phenomenon more clearly, we can run an additional analysis that involves a larger sample of dates. Whereas before a sample of 1000 dates was drawn from the simulated process, we can instead draw 5000 dates and re-run some of the analyses from above. The larger sample will reduce the effect of sampling bias, and we should see an improvement in the hierarchical model's estimate of the target value ($\beta$). It will, however, likely still have a bias (from sampling and perhaps the effect of chronological uncertainty on count sequences) and a lower variance than either those involving a smaller sample of probable sequences or a similar analysis conducted using the alternative sampling framework implemented with `chronup`.
+
+First, draw more samples from the simulation process,
+
+```{r, globals-big}
+nevents <- 5000
+nsamples <- 200000
+tau <- 1000
+beta <- 0.004
+x <- 0:(tau - 1)
+lambda <- exp(beta * x)
+start <- 5000
+end <- (start - tau) + 1
+times <- start:end
+```
+
+```{r, chronup-simdata-big, eval=run_it_simdata_big}
+simdata3 <- chronup::simulate_event_counts(process = lambda,
+                                            times = times,
+                                            nevents = nevents,
+                                            nsamples = nsamples,
+                                            binning_resolution = -10,
+                                            bigmatrix = datapath,
+                                            bigfileprefix = "count_big")
+save(simdata3,
+    file = paste(datapath,
+                "simdata3.RData",
+                sep = ""))
+```
+
+Next, setup and run a Nimble model as before,
+
+```{r, nimble-model-big, eval=run_it_mcmc_big[1]}
+library(nimble)
+
+load(paste(datapath,
+        "simdata3.RData",
+        sep = ""))
+
+rece <- bigmemory::attach.big.matrix(simdata3$count_ensemble)
+X <- bigmemory::attach.big.matrix(paste(datapath,
+                                "X_mat_desc",
+                                sep = ""))
+
+nbCode <- nimbleCode({
+   ###top-level regression
+   B0 ~ dnorm(0, 100)
+   B1 ~ dnorm(0, 100)
+   sigB0 ~ dunif(1e-10, 100)
+   sigB1 ~ dunif(1e-10, 100)
+   for (j in 1:J) {
+      ###low-level regression
+      b0[j] ~ dnorm(mean = B0, sd = sigB0)
+      b1[j] ~ dnorm(mean = B1, sd = sigB1)
+      for (n in 1:N){
+        p[n, j] ~ dunif(1e-10, 1)
+        r[n, j] <- exp(b0[j] + X[n, j] * b1[j])
+        Y[n, j] ~ dnegbin(size = r[n, j], prob = p[n, j])
+      }
+   }
+})
+
+span_index <- which(simdata2$new_timestamps <= start &
+                    simdata2$new_timestamps >= end)
+n <- length(span_index)
+
+J = 5
+
+y_sample <- sample(1:dim(rece)[2],
+                size = J,
+                replace = F)
+x_sample <- sample(seq(2, dim(rece)[2], 2),
+                size = J,
+                replace = F)
+
+nbData <- list(Y = rece[span_index, y_sample],
+                X = X[span_index, x_sample])
+
+nbConsts <- list(N = n,
+                J = J)
+
+nbInits <- list(B0 = 0,
+                B1 = 0,
+                b0 = rep(0, J),
+                b1 = rep(0, J),
+                sigB0 = 0.0001,
+                sigB1 = 0.0001)
+
+nbModel <- nimbleModel(code = nbCode,
+                        data = nbData,
+                        inits = nbInits,
+                        constants = nbConsts)
+
+#compile nimble model to C++ code—much faster runtime
+C_nbModel <- compileNimble(nbModel, showCompilerOutput = FALSE)
+
+#configure the MCMC
+nbModel_conf <- configureMCMC(nbModel)
+
+nbModel_conf$monitors <- c("B0", "B1", "sigB0", "sigB1")
+nbModel_conf$addMonitors2(c("b0", "b1"))
+
+#samplers
+nbModel_conf$removeSamplers(c("B0", "B1", "sigB0", "sigB1", "b0", "b1"))
+nbModel_conf$addSampler(target = c("B0", "B1", "sigB0", "sigB1"),
+                        type = "AF_slice")
+for(j in 1:J){
+   nbModel_conf$addSampler(target = c(paste("b0[", j, "]", sep = ""),
+                                    paste("b1[", j, "]", sep = "")),
+                        type = "AF_slice")
+}
+
+#thinning to conserve memory when the samples are saved below
+thinning <- 10
+nbModel_conf$setThin(thinning)
+nbModel_conf$setThin2(thinning)
+
+set.seed(1)
+
+#build MCMC
+nbModelMCMC <- buildMCMC(nbModel_conf)
+
+#compile MCMC to C++—much faster
+C_nbModelMCMC <- compileNimble(nbModelMCMC, project = nbModel)
+
+niter <- 100000
+
+#save the MCMC chain (monitored variables) as a matrix
+nimble_samples_big <- runMCMC(C_nbModelMCMC, niter = niter)
+
+#save samples
+save(nimble_samples_big,
+        file = paste(datapath,
+                    "mcmc_samples_nimble_big.RData",
+                    sep = ""))
+```
+
+Next, run the `chronup` analysis on the same large-sample dataset,
+
+```{r, chronup-model-big, eval=run_it_mcmc_big[2]}
+load(paste(datapath,
+        "simdata3.RData",
+        sep = ""))
+
+rece <- bigmemory::attach.big.matrix(simdata3$count_ensemble)
+X <- bigmemory::attach.big.matrix(paste(datapath,
+                                "X_mat_desc",
+                                sep = ""))
+
+nsamples <- dim(rece)[2]
+
+span_index <- which(simdata3$new_timestamps <= start &
+                    simdata3$new_timestamps >= end)
+
+N <- length(span_index)
+
+startvals <- c(0, 0, rep(0.1, N))
+startscales <- c(0.1, 0.0002, rep(0.5, N))
+
+adapt_limit <- floor(nsamples * 0.25)
+
+adapt_sample_y <- 1:adapt_limit
+adapt_sample_x <- 1:(adapt_limit * 2)
+
+mcmc_samples_adapt <- chronup::regress(Y = rece[span_index, adapt_sample_y],
+                                        X = X[span_index, adapt_sample_x],
+                                        model = "nb",
+                                        startvals = startvals,
+                                        scales = startscales,
+                                        adapt = T)
+
+burnin <- floor(dim(mcmc_samples_adapt$samples)[1] * 0.2)
+indeces <- seq(burnin, dim(mcmc_samples_adapt$samples)[1], 1)
+adapt_startvals <- colMeans(mcmc_samples_adapt$samples[indeces, ])
+
+burnin <- floor(dim(mcmc_samples_adapt$scales)[1] * 0.2)
+indeces <- seq(burnin, dim(mcmc_samples_adapt$scales)[1], 1)
+adapt_startscales <- colMeans(mcmc_samples_adapt$scales[indeces, ])
+
+chronup_samples_big <- chronup::regress(Y = rece[span_index, ],
+                                X = X[span_index, ],
+                                model = "nb",
+                                startvals = adapt_startvals,
+                                scales = adapt_startscales,
+                                adapt = F)
+save(chronup_samples_big,
+        file = paste(datapath,
+                    "mcmc_samples_chronup_big.RData",
+                    sep = ""))
+```
+
+Then, like last time, plot the results,
+
+```{r plot-mcmc-densities-big, eval=run_it_plot_big}
+load(paste(datapath,
+            "mcmc_samples_nimble_5_big.RData",
+            sep = ""))
+load(paste(datapath,
+            "mcmc_samples_nimble_10_big.RData",
+            sep = ""))
+load(paste(datapath,
+            "mcmc_samples_nimble_50_big.RData",
+            sep = ""))
+load(paste(datapath,
+            "mcmc_samples_nimble_100_big.RData",
+            sep = ""))
+load(paste(datapath,
+            "mcmc_samples_chronup_big.RData",
+            sep = ""))
+
+n_hier <- dim(nimble_samples_5_big$samples)[1]
+n_alt <- dim(chronup_samples_big)[1]
+
+burnin_hier <- floor(n_hier * 0.1)
+burnin_alt <- floor(n_alt * 0.1)
+
+iteration_hier <- (burnin_hier + 1):n_hier
+iteration_hier_all <- rep(iteration_hier, 4)
+iteration_alt <- (burnin_alt + 1):n_alt
+
+n_retained_hier <- length(iteration_hier)
+n_retained_alt <- length(iteration_alt)
+
+plot_samples_hier_5 <- nimble_samples_5_big$samples[iteration_hier, 2]
+plot_samples_hier_10 <- nimble_samples_10_big$samples[iteration_hier, 2]
+plot_samples_hier_50 <- nimble_samples_50_big$samples[iteration_hier, 2]
+plot_samples_hier_100 <- nimble_samples_100_big$samples[iteration_hier, 2]
+plot_samples_hier <- c(plot_samples_hier_5,
+                    plot_samples_hier_10,
+                    plot_samples_hier_50,
+                    plot_samples_hier_100)
+plot_samples_alt <- chronup_samples_big[iteration_alt, 2]
+
+model_name_hier <- rep("hier", n_retained_hier * 4)
+model_name_alt <- rep("alt", n_retained_alt)
+
+J_hier <- rep(c("5", "10", "50", "100"), each = n_retained_hier)
+J_alt <- rep("200000", n_retained_alt)
+
+J_both <- factor(c(J_hier, J_alt), levels = c("5", "10", "50", "100", "200000"))
+
+mcmc_samples_both <- data.frame(Iteration = c(iteration_hier_all,
+                                            iteration_alt),
+                            Model = c(model_name_hier,
+                                    model_name_alt),
+                            J = J_both,
+                            Beta = c(plot_samples_hier,
+                                    plot_samples_alt))
+
+ggplot(data = mcmc_samples_both) +
+    geom_vline(xintercept = beta,
+                linetype = 2,
+                alpha = 0.8) +
+    geom_density(mapping = aes(y = ..scaled.., x = Beta),
+                fill = "steelblue",
+                alpha = 0.5) +
+    facet_wrap(~ J, ncol = 2, scales = "free") +
+    theme_minimal()
+```
+
+As before, to make comparisons easier, we can re-produce the same plot, but this time limit the x-axis to a region around the target value for $\beta$ and align the plot axes:
+
+```{r plot-mcmc-densities2-big, eval=run_it_plot_big}
+ggplot(data = mcmc_samples_both) +
+    geom_vline(xintercept = beta,
+                linetype = 2,
+                alpha = 0.8) +
+    geom_density(mapping = aes(y = ..scaled.., x = Beta),
+                fill = "steelblue",
+                alpha = 0.5) +
+    facet_wrap(~ J, ncol = 2, scales = "free") +
+    scale_x_continuous(limits = c(0.001, 0.007)) +
+    theme_minimal()
+```
+
+Lastly, we should also inspect the mcmc trace plots for each model/estimate, and then examine the Geweke statistics for the main parameter,
+
+```{r plot-mcmc-trace-big, eval=run_it_plot_big}
+ggplot(data = mcmc_samples_both) +
+    geom_hline(yintercept = beta,
+                linetype = 2,
+                alpha = 0.8) +
+    geom_path(mapping = aes(y = Beta, x = Iteration),
+                alpha = 0.85) +
+    facet_wrap(~ J, ncol = 2, scales = "free") +
+    theme_minimal()
+
+geweke.diag(cbind(plot_samples_hier_5,
+                plot_samples_hier_10,
+                plot_samples_hier_50,
+                plot_samples_hier_100,
+                plot_samples_alt))
+```

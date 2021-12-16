@@ -1,0 +1,1549 @@
+\documentclass[]{article}
+\usepackage{lmodern}
+\usepackage{amssymb,amsmath}
+\usepackage{ifxetex,ifluatex}
+\usepackage{fixltx2e} % provides \textsubscript
+\ifnum 0\ifxetex 1\fi\ifluatex 1\fi=0 % if pdftex
+  \usepackage[T1]{fontenc}
+  \usepackage[utf8]{inputenc}
+\else % if luatex or xelatex
+  \ifxetex
+    \usepackage{mathspec}
+  \else
+    \usepackage{fontspec}
+  \fi
+  \defaultfontfeatures{Ligatures=TeX,Scale=MatchLowercase}
+\fi
+% use upquote if available, for straight quotes in verbatim environments
+\IfFileExists{upquote.sty}{\usepackage{upquote}}{}
+% use microtype if available
+\IfFileExists{microtype.sty}{%
+\usepackage[]{microtype}
+\UseMicrotypeSet[protrusion]{basicmath} % disable protrusion for tt fonts
+}{}
+\PassOptionsToPackage{hyphens}{url} % url is loaded by hyperref
+\usepackage[unicode=true]{hyperref}
+\hypersetup{
+            pdftitle={Replication document for Propagating chronological uncertainty with Bayesian regression models},
+            pdfauthor={W. Christopher Carleton; Dave Campbell},
+            pdfborder={0 0 0},
+            breaklinks=true}
+\urlstyle{same}  % don't use monospace font for urls
+\usepackage[margin=1in]{geometry}
+\usepackage{color}
+\usepackage{fancyvrb}
+\newcommand{\VerbBar}{|}
+\newcommand{\VERB}{\Verb[commandchars=\\\{\}]}
+\DefineVerbatimEnvironment{Highlighting}{Verbatim}{commandchars=\\\{\}}
+% Add ',fontsize=\small' for more characters per line
+\usepackage{framed}
+\definecolor{shadecolor}{RGB}{248,248,248}
+\newenvironment{Shaded}{\begin{snugshade}}{\end{snugshade}}
+\newcommand{\KeywordTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{\textbf{#1}}}
+\newcommand{\DataTypeTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{#1}}
+\newcommand{\DecValTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{#1}}
+\newcommand{\BaseNTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{#1}}
+\newcommand{\FloatTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{#1}}
+\newcommand{\ConstantTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
+\newcommand{\CharTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\SpecialCharTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
+\newcommand{\StringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\VerbatimStringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\SpecialStringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\ImportTok}[1]{#1}
+\newcommand{\CommentTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textit{#1}}}
+\newcommand{\DocumentationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\AnnotationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\CommentVarTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\OtherTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{#1}}
+\newcommand{\FunctionTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
+\newcommand{\VariableTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
+\newcommand{\ControlFlowTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{\textbf{#1}}}
+\newcommand{\OperatorTok}[1]{\textcolor[rgb]{0.81,0.36,0.00}{\textbf{#1}}}
+\newcommand{\BuiltInTok}[1]{#1}
+\newcommand{\ExtensionTok}[1]{#1}
+\newcommand{\PreprocessorTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textit{#1}}}
+\newcommand{\AttributeTok}[1]{\textcolor[rgb]{0.77,0.63,0.00}{#1}}
+\newcommand{\RegionMarkerTok}[1]{#1}
+\newcommand{\InformationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\WarningTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\AlertTok}[1]{\textcolor[rgb]{0.94,0.16,0.16}{#1}}
+\newcommand{\ErrorTok}[1]{\textcolor[rgb]{0.64,0.00,0.00}{\textbf{#1}}}
+\newcommand{\NormalTok}[1]{#1}
+\usepackage{graphicx,grffile}
+\makeatletter
+\def\maxwidth{\ifdim\Gin@nat@width>\linewidth\linewidth\else\Gin@nat@width\fi}
+\def\maxheight{\ifdim\Gin@nat@height>\textheight\textheight\else\Gin@nat@height\fi}
+\makeatother
+% Scale images if necessary, so that they will not overflow the page
+% margins by default, and it is still possible to overwrite the defaults
+% using explicit options in \includegraphics[width, height, ...]{}
+\setkeys{Gin}{width=\maxwidth,height=\maxheight,keepaspectratio}
+\IfFileExists{parskip.sty}{%
+\usepackage{parskip}
+}{% else
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{6pt plus 2pt minus 1pt}
+}
+\setlength{\emergencystretch}{3em}  % prevent overfull lines
+\providecommand{\tightlist}{%
+  \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
+\setcounter{secnumdepth}{0}
+% Redefines (sub)paragraphs to behave more like sections
+\ifx\paragraph\undefined\else
+\let\oldparagraph\paragraph
+\renewcommand{\paragraph}[1]{\oldparagraph{#1}\mbox{}}
+\fi
+\ifx\subparagraph\undefined\else
+\let\oldsubparagraph\subparagraph
+\renewcommand{\subparagraph}[1]{\oldsubparagraph{#1}\mbox{}}
+\fi
+
+% set default figure placement to htbp
+\makeatletter
+\def\fps@figure{htbp}
+\makeatother
+
+
+\title{Replication document for `Propagating chronological uncertainty with
+Bayesian regression models'}
+\author{W. Christopher Carleton\footnote{Extreme Events Research Group, Max
+  Planck Institutes for Chemical Ecology, Science of Human History, and
+  Biogeochemistry, Jena Germany} \and Dave Campbell\footnote{School of Mathematics and Statistics, Carleton
+  University, Ottawa Canada}}
+\date{}
+
+\begin{document}
+\maketitle
+
+\section{Libraries}\label{libraries}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{library}\NormalTok{(ggplot2)}
+\KeywordTok{library}\NormalTok{(ggpubr)}
+\KeywordTok{library}\NormalTok{(IntCal)}
+\KeywordTok{library}\NormalTok{(coda)}
+\end{Highlighting}
+\end{Shaded}
+
+\section{Run this script?}\label{run-this-script}
+
+The analyses conducted using the code below can take a long time to run.
+On a desktop with 32 cores and 32G memory, the whole script required
+several hours to complete. So, when originally prepared, this code was
+run in chunks, outputs were saved, and then reloaded into the R
+workspace as needed for plotting results. This made it possible to
+disentangle code processing from minor changes to the wording or layout
+of this document.
+
+To facilitate that separation, a set of variables beginning with
+\texttt{run\_it\_*} were used as toggles and passed as an option to each
+R Markdown chunk below. When a \texttt{run\_it\_*} is \texttt{TRUE}, the
+code in the relevant chunk runs. When false, it is assumed that certain
+results (big matrices and R objects) are already in the R workspace and
+or can be loaded by the relevant code chunk. The toggles include code
+chunks used for plotting and each MCMC analysis has been separated. On
+first running this replication script, you will need to set all of these
+toggles to \texttt{TRUE} in order to fully replicate the analysis
+described in the paper associated with this document.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{run_it_simdata_pre =}\StringTok{ }\NormalTok{F}
+\NormalTok{run_it_simdata_chronup =}\StringTok{ }\NormalTok{F}
+\NormalTok{run_it_mcmc =}\StringTok{ }\KeywordTok{c}\NormalTok{(F,  }\CommentTok{#J=5}
+\NormalTok{                F,  }\CommentTok{#J=10}
+\NormalTok{                F,  }\CommentTok{#J=50}
+\NormalTok{                F,  }\CommentTok{#J=100}
+\NormalTok{                F)  }\CommentTok{#chronup}
+\NormalTok{run_it_plot =}\StringTok{ }\NormalTok{T}
+\NormalTok{run_it_simdata_big =}\StringTok{ }\NormalTok{F}
+\NormalTok{run_it_mcmc_big =}\StringTok{ }\KeywordTok{c}\NormalTok{(F, }\CommentTok{#J=50}
+\NormalTok{                    F) }\CommentTok{#chronup}
+\NormalTok{run_it_plot_big =}\StringTok{ }\NormalTok{T}
+\end{Highlighting}
+\end{Shaded}
+
+\subsection{Directory structure}\label{directory-structure}
+
+R markdown typically runs code chunks in the directory containing the
+relevant .Rmd file (this file). But, it is common practice to separate
+data and source files into different subdirectories within a project
+folder. This .Rmd file assumes that the chunks below are being run in
+the \texttt{Src} folder within a parent project folder. It also assumes
+there is another subdirectory in the parent project folder called
+\texttt{Data}. All data files and output will be saved to the
+\texttt{Data} folder and it is assumed that any data loaded into the
+script is in that folder as well. To change this default behaviour,
+alter the path below as needed (include trailing slash).
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{# relative to the directory containing this .Rmd file}
+\NormalTok{datapath <-}\StringTok{ "../Data/"}
+\end{Highlighting}
+\end{Shaded}
+
+\section{Simulating Count Data}\label{simulating-count-data}
+
+\subsection{True Process}\label{true-process}
+
+As described in the associated paper, the simulation process is based on
+a Poisson distribution with a mean defined by a regression function with
+one covariate. Thus, the count \(y\) at time \(t\) is a random variable
+with the following conditional distribution,
+
+\begin{align}
+    y_t | \lambda_t &\sim Pois(\lambda_t), \\
+    \lambda_t &= e^{\beta X_t}.
+\end{align}
+
+To produce samples from this process while simulating the effect of
+chronological uncertainty, we need to set several parameters. These
+include the number of desired intervals in the sequence (\(tau\)), the
+total number of events in the sequence (\(n\)), a regression coefficient
+(\(\beta\)), covariate sequence (\(x\)), and start and end times for the
+count sequence chronology. For the sake of simplicity, we will assume
+that the time dimension is measured using a Before Present (BP) system
+and that the intervals correspond to years. As a result, the passage of
+time in the analysis that follows corresponds with decreasing age (a
+given number of years before the present).
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{nevents <-}\StringTok{ }\DecValTok{1000}
+\NormalTok{tau <-}\StringTok{ }\DecValTok{1000}
+\NormalTok{beta <-}\StringTok{ }\FloatTok{0.004}
+\NormalTok{x <-}\StringTok{ }\DecValTok{0}\OperatorTok{:}\NormalTok{(tau }\OperatorTok{-}\StringTok{ }\DecValTok{1}\NormalTok{)}
+\NormalTok{start <-}\StringTok{ }\DecValTok{5000}
+\NormalTok{end <-}\StringTok{ }\NormalTok{(start }\OperatorTok{-}\StringTok{ }\NormalTok{tau) }\OperatorTok{+}\StringTok{ }\DecValTok{1}
+\end{Highlighting}
+\end{Shaded}
+
+With these parameters set, we can calculate the conditional mean for the
+Poisson process. We will then randomly sample \(n\) ages from
+\([start, end]\) where the probability of sampling any given age in that
+range corresponds to the conditional mean function. This can be
+accomplished by passing the mean function evaluated at a discrete
+evenly-spaced set of times to R's built-in \texttt{sample()} function.
+Then, we can use the built-in \texttt{graphics::hist()} function to bin
+the sampled ages into a count sequence with the help of the
+\texttt{breaks} argument to define the temporal bin edges.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{lambda <-}\StringTok{ }\KeywordTok{exp}\NormalTok{(beta }\OperatorTok{*}\StringTok{ }\NormalTok{x)}
+\NormalTok{pois_process <-}\StringTok{ }\KeywordTok{data.frame}\NormalTok{(}\DataTypeTok{lambda =}\NormalTok{ lambda)}
+\NormalTok{ages <-}\StringTok{ }\KeywordTok{sample}\NormalTok{(}\DataTypeTok{x =}\NormalTok{ start}\OperatorTok{:}\NormalTok{end,}
+            \DataTypeTok{size =}\NormalTok{ nevents,}
+            \DataTypeTok{prob =}\NormalTok{ lambda,}
+            \DataTypeTok{replace =}\NormalTok{ T)}
+\NormalTok{y <-}\StringTok{ }\NormalTok{graphics}\OperatorTok{::}\KeywordTok{hist}\NormalTok{(ages,}
+                    \DataTypeTok{breaks =} \KeywordTok{seq}\NormalTok{(start, end }\OperatorTok{-}\StringTok{ }\DecValTok{1}\NormalTok{, }\DecValTok{-1}\NormalTok{),}
+                    \DataTypeTok{include.lowest =} \OtherTok{FALSE}\NormalTok{,}
+                    \DataTypeTok{plot =} \OtherTok{FALSE}\NormalTok{)}\OperatorTok{$}\NormalTok{counts}
+\NormalTok{simdata <-}\StringTok{ }\KeywordTok{data.frame}\NormalTok{(}\DataTypeTok{timestamps =}\NormalTok{ start}\OperatorTok{:}\NormalTok{end,}
+                    \DataTypeTok{lambda =}\NormalTok{ lambda,}
+                    \DataTypeTok{y =} \KeywordTok{rev}\NormalTok{(y),}
+                    \DataTypeTok{x =}\NormalTok{ x)}
+\KeywordTok{save}\NormalTok{(simdata,}
+    \DataTypeTok{file =} \KeywordTok{paste}\NormalTok{(datapath,}
+                \StringTok{"simdata.RData"}\NormalTok{,}
+                \DataTypeTok{sep =} \StringTok{""}\NormalTok{))}
+\end{Highlighting}
+\end{Shaded}
+
+Just to be certain that the sample looks sensible, plot the sample along
+with the underlying process (conditional Poisson mean).
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{load}\NormalTok{(}\KeywordTok{paste}\NormalTok{(datapath,}
+            \StringTok{"simdata.RData"}\NormalTok{,}
+            \DataTypeTok{sep =} \StringTok{""}\NormalTok{))}
+\NormalTok{p1 <-}\StringTok{ }\KeywordTok{ggplot}\NormalTok{(simdata) }\OperatorTok{+}
+\StringTok{            }\KeywordTok{geom_path}\NormalTok{(}\KeywordTok{aes}\NormalTok{(}\DataTypeTok{y =}\NormalTok{ lambda, }\DataTypeTok{x =}\NormalTok{ timestamps)) }\OperatorTok{+}
+\StringTok{            }\KeywordTok{theme_minimal}\NormalTok{()}
+\NormalTok{p2 <-}\StringTok{ }\KeywordTok{ggplot}\NormalTok{(simdata) }\OperatorTok{+}
+\StringTok{            }\KeywordTok{geom_col}\NormalTok{(}\KeywordTok{aes}\NormalTok{(}\DataTypeTok{y =}\NormalTok{ y, }\DataTypeTok{x =}\NormalTok{ timestamps)) }\OperatorTok{+}
+\StringTok{            }\KeywordTok{theme_minimal}\NormalTok{()}
+\KeywordTok{ggarrange}\NormalTok{(p1,}
+\NormalTok{        p2,}
+        \DataTypeTok{ncol =} \DecValTok{1}\NormalTok{,}
+        \DataTypeTok{nrow =} \DecValTok{2}\NormalTok{,}
+        \DataTypeTok{align =} \StringTok{"v"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{replication_files/figure-latex/plot-simdata-1.pdf}
+
+We can also quickly check to see whether the sample size is sufficient
+to estimate \(\beta\) by running a simple Poisson regression with R's
+\texttt{glm()} function.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{glm_check <-}\StringTok{ }\KeywordTok{glm}\NormalTok{(y}\OperatorTok{~}\NormalTok{x,}
+                \DataTypeTok{data =}\NormalTok{ simdata,}
+                \DataTypeTok{family =} \StringTok{"poisson"}\NormalTok{)}
+\KeywordTok{summary}\NormalTok{(glm_check)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## 
+## Call:
+## glm(formula = y ~ x, family = "poisson", data = simdata)
+## 
+## Deviance Residuals: 
+##     Min       1Q   Median       3Q      Max  
+## -2.8011  -0.8247  -0.4829   0.4459   3.2839  
+## 
+## Coefficients:
+##               Estimate Std. Error z value Pr(>|z|)    
+## (Intercept) -2.5528366  0.1195663  -21.35   <2e-16 ***
+## x            0.0039473  0.0001506   26.22   <2e-16 ***
+## ---
+## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+## 
+## (Dispersion parameter for poisson family taken to be 1)
+## 
+##     Null deviance: 1930.71  on 999  degrees of freedom
+## Residual deviance:  990.22  on 998  degrees of freedom
+## AIC: 2163.3
+## 
+## Number of Fisher Scoring iterations: 5
+\end{verbatim}
+
+\subsection{Introducing Chronological
+Uncertainty}\label{introducing-chronological-uncertainty}
+
+Adding chronological uncertainty to the simulated data could be done in
+many ways. But, since radiocarbon dating is probably the most commonly
+used chronometric method in the Palaeo Sciences (and very popular
+recently with respect to event count sequences), we will simulate
+radiocarbon uncertainties.
+
+To begin, pass the sampled ages from above to the IntCal packages's
+\texttt{calBP.14C} function. The function returns plausible C14
+determinations (ages in uncalibrated radiocarbon years before present)
+given a set of calendar ages (the ages we sampled). These simulated C14
+ages must then be calibrated and can be stored conveniently in a
+chronological uncertainty matrix called \texttt{chronun\_matrix}. In
+order to align the calibrated date densities (discrete estimates
+provided by calibration software) for storage in the matrix, we also
+need to determine the maximum span of time
+(\texttt{sample\_time\_range}) covered by all the simulated sample
+dates. Lastly, the range of times corresponding to that enclosing
+interval can be stored in a vector separate from the
+\texttt{chronun\_matrix} for use later on. The following code
+accomplishes all of these steps.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{simc14 <-}\StringTok{ }\KeywordTok{t}\NormalTok{(}\KeywordTok{sapply}\NormalTok{(ages, IntCal}\OperatorTok{::}\NormalTok{calBP}\FloatTok{.14}\NormalTok{C))}
+
+\NormalTok{c14post <-}\StringTok{ }\KeywordTok{lapply}\NormalTok{(}\DecValTok{1}\OperatorTok{:}\NormalTok{nevents,}
+                \ControlFlowTok{function}\NormalTok{(x, dates)\{}
+\NormalTok{                    IntCal}\OperatorTok{::}\KeywordTok{caldist}\NormalTok{(}\DataTypeTok{age =}\NormalTok{ dates[x, }\DecValTok{1}\NormalTok{],}
+                                    \DataTypeTok{error =}\NormalTok{ dates[x, }\DecValTok{2}\NormalTok{],}
+                                    \DataTypeTok{BCAD =}\NormalTok{ F)\},}
+                    \DataTypeTok{dates =}\NormalTok{ simc14)}
+\NormalTok{sample_time_range <-}\StringTok{ }\KeywordTok{range}\NormalTok{(}
+                        \KeywordTok{unlist}\NormalTok{(}
+                            \KeywordTok{lapply}\NormalTok{(c14post,}
+                                \ControlFlowTok{function}\NormalTok{(x)}\KeywordTok{range}\NormalTok{(x[, }\DecValTok{1}\NormalTok{])}
+\NormalTok{                            )}
+\NormalTok{                        )}
+\NormalTok{                    )}
+\NormalTok{expanded_times <-}\StringTok{ }\NormalTok{sample_time_range[}\DecValTok{2}\NormalTok{]}\OperatorTok{:}\NormalTok{sample_time_range[}\DecValTok{1}\NormalTok{]}
+\NormalTok{c14post_expanded <-}\StringTok{ }\KeywordTok{lapply}\NormalTok{(c14post,}
+                            \ControlFlowTok{function}\NormalTok{(caldate, times)\{}
+                                    \KeywordTok{approx}\NormalTok{(caldate,}
+                                        \DataTypeTok{xout =}\NormalTok{ times)}\OperatorTok{$}\NormalTok{y}
+\NormalTok{                                    \}, }\DataTypeTok{times =}\NormalTok{ expanded_times)}
+\NormalTok{chronun_matrix <-}\StringTok{ }\KeywordTok{do.call}\NormalTok{(cbind,c14post_expanded)}
+\NormalTok{chronun_matrix[}\KeywordTok{which}\NormalTok{(}\KeywordTok{is.na}\NormalTok{(chronun_matrix))] <-}\StringTok{ }\DecValTok{0}
+\end{Highlighting}
+\end{Shaded}
+
+Next, the \texttt{chronun\_matrix} is used to create an
+\texttt{event\_count\_ensemble}. The ensemble is just a sample of
+probable event counts given the radiocarbon dating uncertainty we just
+simulated. Each member of the ensemble (one probable count sequence)
+will be stored as a column in a matrix. Since we want to create a large
+ensemble, two small functions will be required. One function will sample
+the \texttt{chronun\_matrix} for a probable set of event ages and the
+other will count those events, binning them into a probable count
+sequence with the given resolution (defined by temporal bin edges passed
+as the \texttt{breaks} argument to the \texttt{graphics::hist()}
+function used earlier).
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{# first function - sample event times}
+\NormalTok{sample_event_times <-}\StringTok{ }\ControlFlowTok{function}\NormalTok{(}\DataTypeTok{x =} \OtherTok{NULL}\NormalTok{,}
+\NormalTok{                                chronun_matrix,}
+\NormalTok{                                times)\{}
+\NormalTok{    times_sample <-}\StringTok{ }\KeywordTok{apply}\NormalTok{(chronun_matrix,}
+                            \DecValTok{2}\NormalTok{,}
+                            \ControlFlowTok{function}\NormalTok{(j)}\KeywordTok{sample}\NormalTok{(times, }\DataTypeTok{size=}\DecValTok{1}\NormalTok{, }\DataTypeTok{prob=}\NormalTok{j))}
+    \KeywordTok{return}\NormalTok{(times_sample)}
+\NormalTok{\}}
+\CommentTok{# second function - count events}
+\NormalTok{count_events <-}\StringTok{ }\ControlFlowTok{function}\NormalTok{(x,}
+\NormalTok{                        breaks)\{}
+\NormalTok{    counts <-}\StringTok{ }\NormalTok{graphics}\OperatorTok{::}\KeywordTok{hist}\NormalTok{(x,}
+                            \DataTypeTok{breaks =}\NormalTok{ breaks,}
+                            \DataTypeTok{include.lowest =} \OtherTok{FALSE}\NormalTok{,}
+                            \DataTypeTok{plot =} \OtherTok{FALSE}\NormalTok{)}\OperatorTok{$}\NormalTok{counts}
+    \KeywordTok{return}\NormalTok{(}\KeywordTok{rev}\NormalTok{(counts))}
+\NormalTok{\}}
+\CommentTok{# create breaks vector}
+\NormalTok{start <-}\StringTok{ }\NormalTok{expanded_times[}\DecValTok{1}\NormalTok{]}
+\NormalTok{end <-}\StringTok{ }\NormalTok{expanded_times[}\KeywordTok{length}\NormalTok{(expanded_times)] }\OperatorTok{-}\StringTok{ }\DecValTok{1}
+\NormalTok{breaks <-}\StringTok{ }\KeywordTok{seq}\NormalTok{(}\DataTypeTok{from =}\NormalTok{ start, }\DataTypeTok{to =}\NormalTok{ end, }\DataTypeTok{by =} \DecValTok{-1}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+With the helpful functions in hand, sample 1000 probable event ages:
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{event_time_sample <-}\StringTok{ }\KeywordTok{sapply}\NormalTok{(}\DecValTok{1}\OperatorTok{:}\DecValTok{1000}\NormalTok{,}
+\NormalTok{                        sample_event_times,}
+                        \DataTypeTok{chronun_matrix =}\NormalTok{ chronun_matrix,}
+                        \DataTypeTok{times =}\NormalTok{ expanded_times)}
+\end{Highlighting}
+\end{Shaded}
+
+And, then, compile the count sequences:
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{event_count_ensemble <-}\StringTok{ }\KeywordTok{apply}\NormalTok{(event_time_sample,}
+                            \DecValTok{2}\NormalTok{,}
+\NormalTok{                            count_events,}
+                            \DataTypeTok{breaks =}\NormalTok{ breaks)}
+\KeywordTok{save}\NormalTok{(event_count_ensemble,}
+    \DataTypeTok{file =} \KeywordTok{paste}\NormalTok{(datapath,}
+                \StringTok{"count_ensemble_1.RData"}\NormalTok{,}
+                \DataTypeTok{sep =} \StringTok{""}\NormalTok{))}
+
+\KeywordTok{save}\NormalTok{(expanded_times,}
+    \DataTypeTok{file =} \KeywordTok{paste}\NormalTok{(datapath,}
+                \StringTok{"count_ensemble_1_expanded_times.RData"}\NormalTok{,}
+                \DataTypeTok{sep =} \StringTok{""}\NormalTok{))}
+\end{Highlighting}
+\end{Shaded}
+
+As before, it's a good idea to plot some of the sequences to make sure
+they are as they should be (increasing with the passage of time in a
+roughly exponential-looking way). To help keep variable names to a
+reasonable length, we can refer to any event count ensemble as an
+\texttt{ece} and if the events in question are radiocarbon dated we can
+use \texttt{rece} (radiocarbon-dated event count ensemble).
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{load}\NormalTok{(}\KeywordTok{paste}\NormalTok{(datapath,}
+            \StringTok{"count_ensemble_1.RData"}\NormalTok{,}
+            \DataTypeTok{sep =} \StringTok{""}\NormalTok{))}
+
+\KeywordTok{load}\NormalTok{(}\KeywordTok{paste}\NormalTok{(datapath,}
+            \StringTok{"count_ensemble_1_expanded_times.RData"}\NormalTok{,}
+            \DataTypeTok{sep =} \StringTok{""}\NormalTok{))}
+
+\NormalTok{rece <-}\StringTok{ }\KeywordTok{data.frame}\NormalTok{(}\DataTypeTok{timestamps =}\NormalTok{ expanded_times,}
+\NormalTok{                    event_count_ensemble[,}\DecValTok{1}\OperatorTok{:}\DecValTok{4}\NormalTok{])}
+\NormalTok{p1 <-}\KeywordTok{ggplot}\NormalTok{(rece) }\OperatorTok{+}
+\StringTok{            }\KeywordTok{geom_col}\NormalTok{(}\KeywordTok{aes}\NormalTok{(}\DataTypeTok{y =}\NormalTok{ X1, }\DataTypeTok{x =}\NormalTok{ timestamps)) }\OperatorTok{+}
+\StringTok{            }\KeywordTok{theme_minimal}\NormalTok{()}
+\NormalTok{p2 <-}\StringTok{ }\KeywordTok{ggplot}\NormalTok{(rece) }\OperatorTok{+}
+\StringTok{            }\KeywordTok{geom_col}\NormalTok{(}\KeywordTok{aes}\NormalTok{(}\DataTypeTok{y =}\NormalTok{ X2, }\DataTypeTok{x =}\NormalTok{ timestamps)) }\OperatorTok{+}
+\StringTok{            }\KeywordTok{theme_minimal}\NormalTok{()}
+\NormalTok{p3 <-}\StringTok{ }\KeywordTok{ggplot}\NormalTok{(rece) }\OperatorTok{+}
+\StringTok{            }\KeywordTok{geom_col}\NormalTok{(}\KeywordTok{aes}\NormalTok{(}\DataTypeTok{y =}\NormalTok{ X3, }\DataTypeTok{x =}\NormalTok{ timestamps)) }\OperatorTok{+}
+\StringTok{            }\KeywordTok{theme_minimal}\NormalTok{()}
+\NormalTok{p4 <-}\StringTok{ }\KeywordTok{ggplot}\NormalTok{(rece) }\OperatorTok{+}
+\StringTok{            }\KeywordTok{geom_col}\NormalTok{(}\KeywordTok{aes}\NormalTok{(}\DataTypeTok{y =}\NormalTok{ X4, }\DataTypeTok{x =}\NormalTok{ timestamps)) }\OperatorTok{+}
+\StringTok{            }\KeywordTok{theme_minimal}\NormalTok{()}
+\KeywordTok{ggarrange}\NormalTok{(p1,}
+\NormalTok{        p2,}
+\NormalTok{        p3,}
+\NormalTok{        p4,}
+        \DataTypeTok{ncol =} \DecValTok{2}\NormalTok{,}
+        \DataTypeTok{nrow =} \DecValTok{2}\NormalTok{,}
+        \DataTypeTok{align =} \StringTok{"v"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{replication_files/figure-latex/plot-rece-1.pdf}
+
+In the figure above, each plot shows one probable event count sequence
+given the uncertainty in the simulated radiocarbon dates for the
+corresponding events. Time in the plots proceeds right to left on the BP
+timescale (easy enough to change by reversing the axes if desired).
+Individually, the sequences include no information about chronological
+uncertainty. In isolation a given ensemble member is effectively
+assuming a certain set of ages for the events (sampled at random from
+the corresponding calibrated radiocarbon-date distributions).
+Collectively, though, the ensemble contains the information needed to
+propagate the chronological uncertainty into any further analyses.
+
+\section{\texorpdfstring{Simulating Count Data with
+`chronup'}{Simulating Count Data with chronup}}\label{simulating-count-data-with-chronup}
+
+All of the steps taken so far to simulate data can be repeated more
+easily with an R package called
+\href{https://github.com/wccarleton/chronup}{chronup}. The package is
+currently under development and in a pre-release state (not yet on
+CRAN). But, the code is open and available on GitHub. The package
+\texttt{R::devtools} can be used to download and install the latest
+version of \texttt{chronup}. To facilitate large sample of events and
+very large ensembles, the package can make use of parallelization
+(built-in R functions) and big matrix objects (from
+\texttt{R::bigmemory}). So, it is assumed from here on that this script
+is being run in an environment that supports both.
+
+\begin{verbatim}
+library(devtools)
+install_github("wccarleton/chronup")
+\end{verbatim}
+
+As before, we can define some key parameters to begin. In addition to
+the same ones defined above, a new parameter called \texttt{nsamples}
+will determine how many probable event count sequences to create.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{nevents <-}\StringTok{ }\DecValTok{1000}
+\NormalTok{nsamples <-}\StringTok{ }\DecValTok{200000}
+\NormalTok{tau <-}\StringTok{ }\DecValTok{1000}
+\NormalTok{beta <-}\StringTok{ }\FloatTok{0.004}
+\NormalTok{x <-}\StringTok{ }\DecValTok{0}\OperatorTok{:}\NormalTok{(tau }\OperatorTok{-}\StringTok{ }\DecValTok{1}\NormalTok{)}
+\NormalTok{lambda <-}\StringTok{ }\KeywordTok{exp}\NormalTok{(beta }\OperatorTok{*}\StringTok{ }\NormalTok{x)}
+\NormalTok{start <-}\StringTok{ }\DecValTok{5000}
+\NormalTok{end <-}\StringTok{ }\NormalTok{(start }\OperatorTok{-}\StringTok{ }\NormalTok{tau) }\OperatorTok{+}\StringTok{ }\DecValTok{1}
+\NormalTok{times <-}\StringTok{ }\NormalTok{start}\OperatorTok{:}\NormalTok{end}
+\end{Highlighting}
+\end{Shaded}
+
+With these parameters set, one function call to
+\texttt{chronup::simulate\_event\_counts} will produce 200,000 probable
+event count sequences assuming radiocarbon-dated uncertainties:
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{simdata2 <-}\StringTok{ }\NormalTok{chronup}\OperatorTok{::}\KeywordTok{simulate_event_counts}\NormalTok{(}\DataTypeTok{process =}\NormalTok{ lambda,}
+                                            \DataTypeTok{times =}\NormalTok{ times,}
+                                            \DataTypeTok{nevents =}\NormalTok{ nevents,}
+                                            \DataTypeTok{nsamples =}\NormalTok{ nsamples,}
+                                            \DataTypeTok{binning_resolution =} \DecValTok{-10}\NormalTok{,}
+                                            \DataTypeTok{bigmatrix =}\NormalTok{ datapath)}
+\KeywordTok{save}\NormalTok{(simdata2,}
+    \DataTypeTok{file =} \KeywordTok{paste}\NormalTok{(datapath,}
+                \StringTok{"simdata2.RData"}\NormalTok{,}
+                \DataTypeTok{sep =} \StringTok{""}\NormalTok{))}
+\end{Highlighting}
+\end{Shaded}
+
+The \texttt{chronup} package also includes a convenient way to plot a
+\texttt{rece} or count ensemble. To speed up the plotting process, we
+will plot only a subset of the probable sequences. Since the ensemble
+has been stored in a big memory matrix, we will first have to attach
+that matrix. The path to the matrix is stored as an element in the
+\texttt{simdata2} object (\texttt{simdata\$count\_ensemble}).
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{load}\NormalTok{(}\KeywordTok{paste}\NormalTok{(datapath,}
+        \StringTok{"simdata2.RData"}\NormalTok{,}
+        \DataTypeTok{sep =} \StringTok{""}\NormalTok{))}
+
+\NormalTok{rece <-}\StringTok{ }\NormalTok{bigmemory}\OperatorTok{::}\KeywordTok{attach.big.matrix}\NormalTok{(simdata2}\OperatorTok{$}\NormalTok{count_ensemble)}
+\NormalTok{rece_sub <-}\StringTok{ }\NormalTok{rece[,}\DecValTok{1}\OperatorTok{:}\DecValTok{1000}\NormalTok{]}
+
+\NormalTok{chronup}\OperatorTok{::}\KeywordTok{plot_count_ensemble}\NormalTok{(}\DataTypeTok{count_ensemble =}\NormalTok{ rece_sub,}
+                            \DataTypeTok{times =}\NormalTok{ simdata2}\OperatorTok{$}\NormalTok{new_timestamps,}
+                            \DataTypeTok{axis_x_res =} \DecValTok{10}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{replication_files/figure-latex/chronup-plot-1.pdf}
+
+\begin{verbatim}
+## NULL
+\end{verbatim}
+
+Chronological uncertainty is represented in the plot above by a heat
+map. The colours indicate the relative probability of count-time
+pairings based on the sample represented by the count ensemble. Warmer
+colours indicate higher relative probabilities whereas cooler colours
+indicate lower relative probabilities. So, the most probable true event
+count sequence will be located somewhere in the hottest, brightest
+region of the plot. By default, the plotting function presents the
+passage of time moving left to right. Remember that this is effectively
+a density estimate not a model, and it needs to be treated as such.
+
+\section{Introducing Chronological Uncertainty in the
+Covariate}\label{introducing-chronological-uncertainty-in-the-covariate}
+
+In almost all practical Palaeo Science analyses both the count data and
+any potential explanatory covariates will have chronological
+uncertainties. The covariate (independent variable) used in the
+simulation analyses described here is simply a linear function of
+time---essentially just the passage of time itself. The values of the
+covariate are, therefore, just a series of increasing integers, each
+corresponding to one of the intervals into which the events fall. Still,
+it would be useful to include some kind of covariate uncertainty since
+it would be present in real Palaeo Science research.
+
+With that in mind, we can create another ensemble matrix that reflects
+covariate uncertainty. Each column in the matrix will refer to one
+probable covariate sequence. These could be, for instance, probable
+palaeoclimate reconstructions involving isotopes measured in a
+layer-counted depositional sequence, like a speleothem or a lake core.
+Each sequence, then, would be one probable sequence of isotope
+measurements given the chronological and depth measurement uncertainties
+in a relevant age-depth model. Since the covariate used in the present
+analysis is a simple series of integers, some uncertainty can be
+introduced by adding a random deviation to each value using R's built-in
+probability distributions.
+
+It should be noted that since the span of time occupied by the RECE
+samples is longer than the span of the original process. So, we are
+confronted with two possible solutions. One is to extend the simulated
+covariate series forward and backward (start the sequence at 0 where
+that corresponds to the first element of any given RECE sample). The
+other is to crop both the dependent and independent variables to the
+span of the true process defined by the \texttt{start} and \texttt{end}
+parameters. For this simulation exercise the simplest solution is the
+second one, so that is what we will do.
+
+To begin, establish a bigmatrix object to hold the covariate samples.
+The matrix will have the same number of rows as the RECE matrix and
+twice the number of columns. We are using twice the number of columns in
+order to include an intercept in the model, which will simply be a
+column of \texttt{1}'s. As the MCMC proceeds, columns from the
+independent variable matrix (\texttt{X}) will be selected two at a time
+to account for the intercept.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{X <-}\StringTok{ }\NormalTok{bigmemory}\OperatorTok{::}\KeywordTok{filebacked.big.matrix}\NormalTok{(}
+                    \DataTypeTok{nrow =} \KeywordTok{dim}\NormalTok{(rece)[}\DecValTok{1}\NormalTok{],}
+                    \DataTypeTok{ncol =} \KeywordTok{dim}\NormalTok{(rece)[}\DecValTok{2}\NormalTok{] }\OperatorTok{*}\StringTok{ }\DecValTok{2}\NormalTok{,}
+                    \DataTypeTok{backingpath =}\NormalTok{ datapath,}
+                    \DataTypeTok{backingfile =} \StringTok{"X_mat"}\NormalTok{,}
+                    \DataTypeTok{descriptorfile =} \StringTok{"X_mat_desc"}\NormalTok{)}
+
+\NormalTok{X_loc <-}\StringTok{ }\NormalTok{bigmemory}\OperatorTok{::}\KeywordTok{describe}\NormalTok{(X)}
+\end{Highlighting}
+\end{Shaded}
+
+For each observation in the covariate sequence, we add a random
+deviation and then store the result in the \texttt{X} matrix. We can
+make use of parallelization and a progress bar to speed up this process
+and monitor it. Note that in order to preserve the temporal scale and
+obtain estimates of \texttt{beta} at the correct scale, we have to
+multiply the time indeces by the resolution of the temporal bins, which
+means multiplying in this case by 10. Likewise, it is important to note
+that the uncertainty we wish to introduce into the covariate would need
+to be scaled accordingly to ensure that a sensible level of uncertainty
+is being included. For simplicity, we will use a standard deviation 2,
+which corresponds to 20 years at the original temporal resolution of the
+simulated data. In a real-world analysis, forgetting to account for the
+temporal width of the bins can lead to scaled parameter estimates. The
+estimates would be a multiple of the temporal resolution in the case of
+a regression coefficient referring only to the passage of time.
+Correcting the scale after obtaining parameter estimates would involve
+dividing those estimates by the temporal resolution of the bins, but
+here we can avoid the problem by scaling appropriately at the outset.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{library}\NormalTok{(pbapply)}
+\KeywordTok{library}\NormalTok{(parallel)}
+
+\NormalTok{cl <-}\StringTok{ }\KeywordTok{makeCluster}\NormalTok{(}\KeywordTok{detectCores}\NormalTok{() }\OperatorTok{-}\StringTok{ }\DecValTok{1}\NormalTok{)}
+
+\NormalTok{x_error =}\StringTok{ }\DecValTok{2}
+
+\KeywordTok{pbsapply}\NormalTok{(}\DataTypeTok{cl =}\NormalTok{ cl,}
+        \DataTypeTok{X =} \DecValTok{1}\OperatorTok{:}\KeywordTok{dim}\NormalTok{(rece)[}\DecValTok{2}\NormalTok{],}
+        \DataTypeTok{FUN =} \ControlFlowTok{function}\NormalTok{(j,}
+\NormalTok{                    x_error,}
+\NormalTok{                    n,}
+\NormalTok{                    nX,}
+\NormalTok{                    X_loc)\{}
+                \KeywordTok{library}\NormalTok{(bigmemory)}
+\NormalTok{                X <-}\StringTok{ }\KeywordTok{attach.big.matrix}\NormalTok{(X_loc)}
+\NormalTok{                x_indeces <-}\StringTok{ }\DecValTok{1}\OperatorTok{:}\NormalTok{nX }\OperatorTok{+}\StringTok{ }\NormalTok{(nX }\OperatorTok{*}\StringTok{ }\NormalTok{(j }\OperatorTok{-}\StringTok{ }\DecValTok{1}\NormalTok{))}
+\NormalTok{                X[, x_indeces[}\DecValTok{1}\NormalTok{]] <-}\StringTok{ }\DecValTok{1}
+\NormalTok{                xx <-}\StringTok{ }\KeywordTok{rnorm}\NormalTok{(}\DataTypeTok{n =}\NormalTok{ n,}
+                            \DataTypeTok{mean =} \DecValTok{0}\OperatorTok{:}\NormalTok{(n }\OperatorTok{-}\StringTok{ }\DecValTok{1}\NormalTok{),}
+                            \DataTypeTok{sd =}\NormalTok{ x_error)}
+\NormalTok{                X[,x_indeces[}\DecValTok{2}\NormalTok{]] <-}\StringTok{ }\NormalTok{xx }\OperatorTok{*}\StringTok{ }\DecValTok{10}
+                \KeywordTok{return}\NormalTok{()\},}
+        \DataTypeTok{x_error =}\NormalTok{ x_error,}
+        \DataTypeTok{n =} \KeywordTok{dim}\NormalTok{(rece)[}\DecValTok{1}\NormalTok{],}
+        \DataTypeTok{nX =} \DecValTok{2}\NormalTok{,}
+        \DataTypeTok{X_loc =}\NormalTok{ X_loc)}
+
+\KeywordTok{stopCluster}\NormalTok{(cl)}
+\end{Highlighting}
+\end{Shaded}
+
+\section{Accounting for chronological uncertainty in
+regression}\label{accounting-for-chronological-uncertainty-in-regression}
+
+Recently, attempts have been made to handle chronological uncertainty in
+Palaeo Science regression analyses. As described in the paper associated
+with this replication document, these recent attempts have involved a
+hierarchical arrangement of parameters in count-based regression models.
+In this section, we run one of these analyses on the data simulated
+above and then explore an alternate approach using the same data.
+
+\subsection{Hierarchical arrangement}\label{hierarchical-arrangement}
+
+For the hierarchical model, we use a Bayesian R package called
+\href{https://r-nimble.org/}{Nimble}. Nimble is a system for creating
+Bayesian models and estimating model parameters with a flexible,
+sophisticated MCMC engine. The core of Nimble model specification is
+based on an older language for writing Bayesian models called ``BUGS''.
+The first step is to write the model using a Nimble R function and
+Nimble's slightly adapted BUGS language. Then, the model definition
+along with other important variables are used to create a Nimble model
+object, which is subsequently passed to Nimble's MCMC engine (after MCMC
+settings are established). Nimble allows for all of the relevant R code
+and objects to be compiled to C++, which massively reduces computation
+times.
+
+The following code is used to create a hierarchical model in Nimble and
+run an MCMC given the data simulated above,
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{library}\NormalTok{(nimble)}
+
+\KeywordTok{load}\NormalTok{(}\KeywordTok{paste}\NormalTok{(datapath,}
+        \StringTok{"simdata2.RData"}\NormalTok{,}
+        \DataTypeTok{sep =} \StringTok{""}\NormalTok{))}
+
+\NormalTok{rece <-}\StringTok{ }\NormalTok{bigmemory}\OperatorTok{::}\KeywordTok{attach.big.matrix}\NormalTok{(simdata2}\OperatorTok{$}\NormalTok{count_ensemble)}
+\NormalTok{X <-}\StringTok{ }\NormalTok{bigmemory}\OperatorTok{::}\KeywordTok{attach.big.matrix}\NormalTok{(}\KeywordTok{paste}\NormalTok{(datapath,}
+                                \StringTok{"X_mat_desc"}\NormalTok{,}
+                                \DataTypeTok{sep =} \StringTok{""}\NormalTok{))}
+
+\NormalTok{nbCode <-}\StringTok{ }\KeywordTok{nimbleCode}\NormalTok{(\{}
+\NormalTok{   ###top-level regression}
+\NormalTok{   B0 }\OperatorTok{~}\StringTok{ }\KeywordTok{dnorm}\NormalTok{(}\DecValTok{0}\NormalTok{, }\DecValTok{100}\NormalTok{)}
+\NormalTok{   B1 }\OperatorTok{~}\StringTok{ }\KeywordTok{dnorm}\NormalTok{(}\DecValTok{0}\NormalTok{, }\DecValTok{100}\NormalTok{)}
+\NormalTok{   sigB0 }\OperatorTok{~}\StringTok{ }\KeywordTok{dunif}\NormalTok{(}\FloatTok{1e-10}\NormalTok{, }\DecValTok{100}\NormalTok{)}
+\NormalTok{   sigB1 }\OperatorTok{~}\StringTok{ }\KeywordTok{dunif}\NormalTok{(}\FloatTok{1e-10}\NormalTok{, }\DecValTok{100}\NormalTok{)}
+   \ControlFlowTok{for}\NormalTok{ (j }\ControlFlowTok{in} \DecValTok{1}\OperatorTok{:}\NormalTok{J) \{}
+\NormalTok{      ###low-level regression}
+\NormalTok{      b0[j] }\OperatorTok{~}\StringTok{ }\KeywordTok{dnorm}\NormalTok{(}\DataTypeTok{mean =}\NormalTok{ B0, }\DataTypeTok{sd =}\NormalTok{ sigB0)}
+\NormalTok{      b1[j] }\OperatorTok{~}\StringTok{ }\KeywordTok{dnorm}\NormalTok{(}\DataTypeTok{mean =}\NormalTok{ B1, }\DataTypeTok{sd =}\NormalTok{ sigB1)}
+      \ControlFlowTok{for}\NormalTok{ (n }\ControlFlowTok{in} \DecValTok{1}\OperatorTok{:}\NormalTok{N)\{}
+\NormalTok{        p[n, j] }\OperatorTok{~}\StringTok{ }\KeywordTok{dunif}\NormalTok{(}\FloatTok{1e-10}\NormalTok{, }\DecValTok{1}\NormalTok{)}
+\NormalTok{        r[n, j] <-}\StringTok{ }\KeywordTok{exp}\NormalTok{(b0[j] }\OperatorTok{+}\StringTok{ }\NormalTok{X[n, j] }\OperatorTok{*}\StringTok{ }\NormalTok{b1[j])}
+\NormalTok{        Y[n, j] }\OperatorTok{~}\StringTok{ }\KeywordTok{dnegbin}\NormalTok{(}\DataTypeTok{size =}\NormalTok{ r[n, j], }\DataTypeTok{prob =}\NormalTok{ p[n, j])}
+\NormalTok{      \}}
+\NormalTok{   \}}
+\NormalTok{\})}
+\end{Highlighting}
+\end{Shaded}
+
+With the Nimble model defined, sample the data matrices, setup the MCMC,
+and run it. First, we will create a vector (\texttt{span\_index}) for
+subsetting the data to the interval of time covered by the simlations
+process (i.e., 5000:4001 BP). We will also use Nimble's slice samplers
+for the sub-regressions (probable regressions at the lower level of the
+hierarchy) to improve the sampling of the model posteriors and then run
+the MCMC for at least \texttt{niter\ =\ 1000000} iterations (thinned to
+retain only every 10th sample). Some of these MCMC parameters can be set
+up globally, while others have to be established again for each new MCMC
+run because of the way Nimble compiles code to C++, as described
+earlier. The global parameters are,
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{span_index <-}\StringTok{ }\KeywordTok{which}\NormalTok{(simdata2}\OperatorTok{$}\NormalTok{new_timestamps }\OperatorTok{<=}\StringTok{ }\NormalTok{start }\OperatorTok{&}
+\StringTok{                    }\NormalTok{simdata2}\OperatorTok{$}\NormalTok{new_timestamps }\OperatorTok{>=}\StringTok{ }\NormalTok{end)}
+\NormalTok{n <-}\StringTok{ }\KeywordTok{length}\NormalTok{(span_index)}
+
+\CommentTok{#number of MCMC iterations}
+\NormalTok{niter <-}\StringTok{ }\DecValTok{1000000}
+
+\CommentTok{#thinning to save space}
+\NormalTok{thinning <-}\StringTok{ }\DecValTok{10}
+
+\CommentTok{#set seed for replicability}
+\KeywordTok{set.seed}\NormalTok{(}\DecValTok{1}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+To explore the impact of the size of the sample of probable sequences on
+the posterior density estimates, we will run 4 separate MCMC
+simulations: one simulation for each of \(J \in [5, 10, 50, 100]\). Only
+the code for the first of these---\texttt{J\ =\ 5}---is printed in the
+PDF/md document produced by this script, but the code for each is in the
+script below.
+
+Importantly, we need to select the J draws from the RECE and the
+corresponding J draws from the matrix containing the covariate (X)
+values with uncertainty added in. The J RECE columns will be randomly
+sampled without replacement (they are already a random sample of
+probable count sequences and we do not want to select a given sequence
+more than once). For the `X' matrix, we need to select every other
+column, though, because that matrix contains alternating columns of 1's
+representing the model intercept and covariate values. The intercept is
+included in the Nimble model specification internally, and so needs to
+be excluded from the covariate matrix.
+
+The code for the MCMC involving \texttt{J\ =\ 5} probable sequences (and
+matching covariate sequences) is as follows,
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{span_index <-}\StringTok{ }\KeywordTok{which}\NormalTok{(simdata2}\OperatorTok{$}\NormalTok{new_timestamps }\OperatorTok{<=}\StringTok{ }\NormalTok{start }\OperatorTok{&}
+\StringTok{                    }\NormalTok{simdata2}\OperatorTok{$}\NormalTok{new_timestamps }\OperatorTok{>=}\StringTok{ }\NormalTok{end)}
+\NormalTok{n <-}\StringTok{ }\KeywordTok{length}\NormalTok{(span_index)}
+\NormalTok{J =}\StringTok{ }\DecValTok{5}
+
+\NormalTok{y_sample <-}\StringTok{ }\KeywordTok{sample}\NormalTok{(}\DecValTok{1}\OperatorTok{:}\KeywordTok{dim}\NormalTok{(rece)[}\DecValTok{2}\NormalTok{],}
+                \DataTypeTok{size =}\NormalTok{ J,}
+                \DataTypeTok{replace =}\NormalTok{ F)}
+\NormalTok{x_sample <-}\StringTok{ }\KeywordTok{sample}\NormalTok{(}\KeywordTok{seq}\NormalTok{(}\DecValTok{2}\NormalTok{, }\KeywordTok{dim}\NormalTok{(rece)[}\DecValTok{2}\NormalTok{], }\DecValTok{2}\NormalTok{),}
+                \DataTypeTok{size =}\NormalTok{ J,}
+                \DataTypeTok{replace =}\NormalTok{ F)}
+
+\NormalTok{nbData <-}\StringTok{ }\KeywordTok{list}\NormalTok{(}\DataTypeTok{Y =}\NormalTok{ rece[span_index, y_sample],}
+                \DataTypeTok{X =}\NormalTok{ X[span_index, x_sample])}
+
+\NormalTok{nbConsts <-}\StringTok{ }\KeywordTok{list}\NormalTok{(}\DataTypeTok{N =}\NormalTok{ n,}
+                \DataTypeTok{J =}\NormalTok{ J)}
+
+\NormalTok{nbInits <-}\StringTok{ }\KeywordTok{list}\NormalTok{(}\DataTypeTok{B0 =} \DecValTok{0}\NormalTok{,}
+                \DataTypeTok{B1 =} \DecValTok{0}\NormalTok{,}
+                \DataTypeTok{b0 =} \KeywordTok{rep}\NormalTok{(}\DecValTok{0}\NormalTok{, J),}
+                \DataTypeTok{b1 =} \KeywordTok{rep}\NormalTok{(}\DecValTok{0}\NormalTok{, J),}
+                \DataTypeTok{sigB0 =} \FloatTok{0.0001}\NormalTok{,}
+                \DataTypeTok{sigB1 =} \FloatTok{0.0001}\NormalTok{)}
+
+\NormalTok{nbModel <-}\StringTok{ }\KeywordTok{nimbleModel}\NormalTok{(}\DataTypeTok{code =}\NormalTok{ nbCode,}
+                        \DataTypeTok{data =}\NormalTok{ nbData,}
+                        \DataTypeTok{inits =}\NormalTok{ nbInits,}
+                        \DataTypeTok{constants =}\NormalTok{ nbConsts)}
+
+\CommentTok{#compile nimble model to C++ code—much faster runtime}
+\NormalTok{C_nbModel <-}\StringTok{ }\KeywordTok{compileNimble}\NormalTok{(nbModel, }\DataTypeTok{showCompilerOutput =} \OtherTok{FALSE}\NormalTok{)}
+
+\CommentTok{#configure the MCMC}
+\NormalTok{nbModel_conf <-}\StringTok{ }\KeywordTok{configureMCMC}\NormalTok{(nbModel)}
+
+\NormalTok{nbModel_conf}\OperatorTok{$}\NormalTok{monitors <-}\StringTok{ }\KeywordTok{c}\NormalTok{(}\StringTok{"B0"}\NormalTok{, }\StringTok{"B1"}\NormalTok{, }\StringTok{"sigB0"}\NormalTok{, }\StringTok{"sigB1"}\NormalTok{)}
+\NormalTok{nbModel_conf}\OperatorTok{$}\KeywordTok{addMonitors2}\NormalTok{(}\KeywordTok{c}\NormalTok{(}\StringTok{"b0"}\NormalTok{, }\StringTok{"b1"}\NormalTok{))}
+
+\CommentTok{#samplers}
+\NormalTok{nbModel_conf}\OperatorTok{$}\KeywordTok{removeSamplers}\NormalTok{(}\KeywordTok{c}\NormalTok{(}\StringTok{"B0"}\NormalTok{, }\StringTok{"B1"}\NormalTok{, }\StringTok{"sigB0"}\NormalTok{, }\StringTok{"sigB1"}\NormalTok{, }\StringTok{"b0"}\NormalTok{, }\StringTok{"b1"}\NormalTok{))}
+\NormalTok{nbModel_conf}\OperatorTok{$}\KeywordTok{addSampler}\NormalTok{(}\DataTypeTok{target =} \KeywordTok{c}\NormalTok{(}\StringTok{"B0"}\NormalTok{, }\StringTok{"B1"}\NormalTok{, }\StringTok{"sigB0"}\NormalTok{, }\StringTok{"sigB1"}\NormalTok{),}
+                        \DataTypeTok{type =} \StringTok{"AF_slice"}\NormalTok{)}
+\ControlFlowTok{for}\NormalTok{(j }\ControlFlowTok{in} \DecValTok{1}\OperatorTok{:}\NormalTok{J)\{}
+\NormalTok{   nbModel_conf}\OperatorTok{$}\KeywordTok{addSampler}\NormalTok{(}\DataTypeTok{target =} \KeywordTok{c}\NormalTok{(}\KeywordTok{paste}\NormalTok{(}\StringTok{"b0["}\NormalTok{, j, }\StringTok{"]"}\NormalTok{, }\DataTypeTok{sep =} \StringTok{""}\NormalTok{),}
+                                    \KeywordTok{paste}\NormalTok{(}\StringTok{"b1["}\NormalTok{, j, }\StringTok{"]"}\NormalTok{, }\DataTypeTok{sep =} \StringTok{""}\NormalTok{)),}
+                        \DataTypeTok{type =} \StringTok{"AF_slice"}\NormalTok{)}
+\NormalTok{\}}
+
+\CommentTok{#thinning to conserve memory when the samples are saved below}
+\NormalTok{nbModel_conf}\OperatorTok{$}\KeywordTok{setThin}\NormalTok{(thinning)}
+\NormalTok{nbModel_conf}\OperatorTok{$}\KeywordTok{setThin2}\NormalTok{(thinning)}
+
+\CommentTok{#build MCMC}
+\NormalTok{nbModelMCMC <-}\StringTok{ }\KeywordTok{buildMCMC}\NormalTok{(nbModel_conf)}
+
+\CommentTok{#compile MCMC to C++—much faster}
+\NormalTok{C_nbModelMCMC <-}\StringTok{ }\KeywordTok{compileNimble}\NormalTok{(nbModelMCMC, }\DataTypeTok{project =}\NormalTok{ nbModel)}
+
+\CommentTok{#save the MCMC chain (monitored variables) as a matrix}
+\NormalTok{nimble_samples_}\DecValTok{5}\NormalTok{ <-}\StringTok{ }\KeywordTok{runMCMC}\NormalTok{(C_nbModelMCMC, }\DataTypeTok{niter =}\NormalTok{ niter)}
+
+\CommentTok{#save samples}
+\KeywordTok{save}\NormalTok{(nimble_samples_}\DecValTok{5}\NormalTok{,}
+        \DataTypeTok{file =} \KeywordTok{paste}\NormalTok{(datapath,}
+                    \StringTok{"mcmc_samples_nimble_5.RData"}\NormalTok{,}
+                    \DataTypeTok{sep =} \StringTok{""}\NormalTok{))}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{span_index <-}\StringTok{ }\KeywordTok{which}\NormalTok{(simdata2}\OperatorTok{$}\NormalTok{new_timestamps }\OperatorTok{<=}\StringTok{ }\NormalTok{start }\OperatorTok{&}
+\StringTok{                    }\NormalTok{simdata2}\OperatorTok{$}\NormalTok{new_timestamps }\OperatorTok{>=}\StringTok{ }\NormalTok{end)}
+\NormalTok{n <-}\StringTok{ }\KeywordTok{length}\NormalTok{(span_index)}
+\NormalTok{J =}\StringTok{ }\DecValTok{50}
+
+\NormalTok{y_sample <-}\StringTok{ }\KeywordTok{sample}\NormalTok{(}\DecValTok{1}\OperatorTok{:}\KeywordTok{dim}\NormalTok{(rece)[}\DecValTok{2}\NormalTok{],}
+                \DataTypeTok{size =}\NormalTok{ J,}
+                \DataTypeTok{replace =}\NormalTok{ F)}
+\NormalTok{x_sample <-}\StringTok{ }\KeywordTok{sample}\NormalTok{(}\KeywordTok{seq}\NormalTok{(}\DecValTok{2}\NormalTok{, }\KeywordTok{dim}\NormalTok{(rece)[}\DecValTok{2}\NormalTok{], }\DecValTok{2}\NormalTok{),}
+                \DataTypeTok{size =}\NormalTok{ J,}
+                \DataTypeTok{replace =}\NormalTok{ F)}
+
+\NormalTok{nbData <-}\StringTok{ }\KeywordTok{list}\NormalTok{(}\DataTypeTok{Y =}\NormalTok{ rece[span_index, y_sample],}
+                \DataTypeTok{X =}\NormalTok{ X[span_index, x_sample])}
+
+\NormalTok{nbConsts <-}\StringTok{ }\KeywordTok{list}\NormalTok{(}\DataTypeTok{N =}\NormalTok{ n,}
+                \DataTypeTok{J =}\NormalTok{ J)}
+
+\NormalTok{nbInits <-}\StringTok{ }\KeywordTok{list}\NormalTok{(}\DataTypeTok{B0 =} \DecValTok{0}\NormalTok{,}
+                \DataTypeTok{B1 =} \DecValTok{0}\NormalTok{,}
+                \DataTypeTok{b0 =} \KeywordTok{rep}\NormalTok{(}\DecValTok{0}\NormalTok{, J),}
+                \DataTypeTok{b1 =} \KeywordTok{rep}\NormalTok{(}\DecValTok{0}\NormalTok{, J),}
+                \DataTypeTok{sigB0 =} \FloatTok{0.0001}\NormalTok{,}
+                \DataTypeTok{sigB1 =} \FloatTok{0.0001}\NormalTok{)}
+
+\NormalTok{nbModel <-}\StringTok{ }\KeywordTok{nimbleModel}\NormalTok{(}\DataTypeTok{code =}\NormalTok{ nbCode,}
+                        \DataTypeTok{data =}\NormalTok{ nbData,}
+                        \DataTypeTok{inits =}\NormalTok{ nbInits,}
+                        \DataTypeTok{constants =}\NormalTok{ nbConsts)}
+
+\CommentTok{#compile nimble model to C++ code—much faster runtime}
+\NormalTok{C_nbModel <-}\StringTok{ }\KeywordTok{compileNimble}\NormalTok{(nbModel, }\DataTypeTok{showCompilerOutput =} \OtherTok{FALSE}\NormalTok{)}
+
+\CommentTok{#configure the MCMC}
+\NormalTok{nbModel_conf <-}\StringTok{ }\KeywordTok{configureMCMC}\NormalTok{(nbModel)}
+
+\NormalTok{nbModel_conf}\OperatorTok{$}\NormalTok{monitors <-}\StringTok{ }\KeywordTok{c}\NormalTok{(}\StringTok{"B0"}\NormalTok{, }\StringTok{"B1"}\NormalTok{, }\StringTok{"sigB0"}\NormalTok{, }\StringTok{"sigB1"}\NormalTok{)}
+\NormalTok{nbModel_conf}\OperatorTok{$}\KeywordTok{addMonitors2}\NormalTok{(}\KeywordTok{c}\NormalTok{(}\StringTok{"b0"}\NormalTok{, }\StringTok{"b1"}\NormalTok{))}
+
+\CommentTok{#samplers}
+\NormalTok{nbModel_conf}\OperatorTok{$}\KeywordTok{removeSamplers}\NormalTok{(}\KeywordTok{c}\NormalTok{(}\StringTok{"B0"}\NormalTok{, }\StringTok{"B1"}\NormalTok{, }\StringTok{"sigB0"}\NormalTok{, }\StringTok{"sigB1"}\NormalTok{, }\StringTok{"b0"}\NormalTok{, }\StringTok{"b1"}\NormalTok{))}
+\NormalTok{nbModel_conf}\OperatorTok{$}\KeywordTok{addSampler}\NormalTok{(}\DataTypeTok{target =} \KeywordTok{c}\NormalTok{(}\StringTok{"B0"}\NormalTok{, }\StringTok{"B1"}\NormalTok{, }\StringTok{"sigB0"}\NormalTok{, }\StringTok{"sigB1"}\NormalTok{),}
+                        \DataTypeTok{type =} \StringTok{"AF_slice"}\NormalTok{)}
+\ControlFlowTok{for}\NormalTok{(j }\ControlFlowTok{in} \DecValTok{1}\OperatorTok{:}\NormalTok{J)\{}
+\NormalTok{   nbModel_conf}\OperatorTok{$}\KeywordTok{addSampler}\NormalTok{(}\DataTypeTok{target =} \KeywordTok{c}\NormalTok{(}\KeywordTok{paste}\NormalTok{(}\StringTok{"b0["}\NormalTok{, j, }\StringTok{"]"}\NormalTok{, }\DataTypeTok{sep =} \StringTok{""}\NormalTok{),}
+                                    \KeywordTok{paste}\NormalTok{(}\StringTok{"b1["}\NormalTok{, j, }\StringTok{"]"}\NormalTok{, }\DataTypeTok{sep =} \StringTok{""}\NormalTok{)),}
+                        \DataTypeTok{type =} \StringTok{"AF_slice"}\NormalTok{)}
+\NormalTok{\}}
+
+\CommentTok{#thinning to conserve memory when the samples are saved below}
+\NormalTok{nbModel_conf}\OperatorTok{$}\KeywordTok{setThin}\NormalTok{(thinning)}
+\NormalTok{nbModel_conf}\OperatorTok{$}\KeywordTok{setThin2}\NormalTok{(thinning)}
+
+\CommentTok{#build MCMC}
+\NormalTok{nbModelMCMC <-}\StringTok{ }\KeywordTok{buildMCMC}\NormalTok{(nbModel_conf)}
+
+\CommentTok{#compile MCMC to C++—much faster}
+\NormalTok{C_nbModelMCMC <-}\StringTok{ }\KeywordTok{compileNimble}\NormalTok{(nbModelMCMC, }\DataTypeTok{project =}\NormalTok{ nbModel)}
+
+\CommentTok{#save the MCMC chain (monitored variables) as a matrix}
+\NormalTok{nimble_samples_}\DecValTok{50}\NormalTok{ <-}\StringTok{ }\KeywordTok{runMCMC}\NormalTok{(C_nbModelMCMC, }\DataTypeTok{niter =}\NormalTok{ niter)}
+
+\CommentTok{#save samples}
+\KeywordTok{save}\NormalTok{(nimble_samples_}\DecValTok{50}\NormalTok{,}
+        \DataTypeTok{file =} \KeywordTok{paste}\NormalTok{(datapath,}
+                    \StringTok{"mcmc_samples_nimble_50.RData"}\NormalTok{,}
+                    \DataTypeTok{sep =} \StringTok{""}\NormalTok{))}
+\end{Highlighting}
+\end{Shaded}
+
+\subsection{\texorpdfstring{Alternative with
+\texttt{chronup}}{Alternative with chronup}}\label{alternative-with-chronup}
+
+Next, we can use a regression function from the \texttt{chronup} package
+to perform another count-based regression on these simulated data while
+propagating the uncertainty in the data up to the posterior estimates of
+the model's parameters. In this case, though, the parameters are not
+hierarchically arranged as they were for the Nimble analysis.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{span_index <-}\StringTok{ }\KeywordTok{which}\NormalTok{(simdata2}\OperatorTok{$}\NormalTok{new_timestamps }\OperatorTok{<=}\StringTok{ }\NormalTok{start }\OperatorTok{&}
+\StringTok{                    }\NormalTok{simdata2}\OperatorTok{$}\NormalTok{new_timestamps }\OperatorTok{>=}\StringTok{ }\NormalTok{end)}
+
+\NormalTok{startvals <-}\StringTok{ }\KeywordTok{c}\NormalTok{(}\DecValTok{0}\NormalTok{, }\DecValTok{0}\NormalTok{, }\KeywordTok{rep}\NormalTok{(}\FloatTok{0.1}\NormalTok{, }\DecValTok{100}\NormalTok{))}
+\NormalTok{startscales <-}\StringTok{ }\KeywordTok{c}\NormalTok{(}\FloatTok{0.1}\NormalTok{, }\FloatTok{0.0002}\NormalTok{, }\KeywordTok{rep}\NormalTok{(}\FloatTok{0.5}\NormalTok{, }\DecValTok{100}\NormalTok{))}
+
+\NormalTok{adapt_limit <-}\StringTok{ }\KeywordTok{floor}\NormalTok{(nsamples }\OperatorTok{*}\StringTok{ }\FloatTok{0.25}\NormalTok{)}
+
+\NormalTok{adapt_sample_y <-}\StringTok{ }\DecValTok{1}\OperatorTok{:}\NormalTok{adapt_limit}
+\NormalTok{adapt_sample_x <-}\StringTok{ }\DecValTok{1}\OperatorTok{:}\NormalTok{(adapt_limit }\OperatorTok{*}\StringTok{ }\DecValTok{2}\NormalTok{)}
+
+\NormalTok{mcmc_samples_adapt <-}\StringTok{ }\NormalTok{chronup}\OperatorTok{::}\KeywordTok{regress}\NormalTok{(}\DataTypeTok{Y =}\NormalTok{ rece[span_index, adapt_sample_y],}
+                                        \DataTypeTok{X =}\NormalTok{ X[span_index, adapt_sample_x],}
+                                        \DataTypeTok{model =} \StringTok{"nb"}\NormalTok{,}
+                                        \DataTypeTok{startvals =}\NormalTok{ startvals,}
+                                        \DataTypeTok{scales =}\NormalTok{ startscales,}
+                                        \DataTypeTok{adapt =}\NormalTok{ T)}
+
+\NormalTok{burnin <-}\StringTok{ }\KeywordTok{floor}\NormalTok{(}\KeywordTok{dim}\NormalTok{(mcmc_samples_adapt}\OperatorTok{$}\NormalTok{samples)[}\DecValTok{1}\NormalTok{] }\OperatorTok{*}\StringTok{ }\FloatTok{0.2}\NormalTok{)}
+\NormalTok{indeces <-}\StringTok{ }\KeywordTok{seq}\NormalTok{(burnin, }\KeywordTok{dim}\NormalTok{(mcmc_samples_adapt}\OperatorTok{$}\NormalTok{samples)[}\DecValTok{1}\NormalTok{], }\DecValTok{1}\NormalTok{)}
+\NormalTok{adapt_startvals <-}\StringTok{ }\KeywordTok{colMeans}\NormalTok{(mcmc_samples_adapt}\OperatorTok{$}\NormalTok{samples[indeces, ])}
+
+\NormalTok{burnin <-}\StringTok{ }\KeywordTok{floor}\NormalTok{(}\KeywordTok{dim}\NormalTok{(mcmc_samples_adapt}\OperatorTok{$}\NormalTok{scales)[}\DecValTok{1}\NormalTok{] }\OperatorTok{*}\StringTok{ }\FloatTok{0.2}\NormalTok{)}
+\NormalTok{indeces <-}\StringTok{ }\KeywordTok{seq}\NormalTok{(burnin, }\KeywordTok{dim}\NormalTok{(mcmc_samples_adapt}\OperatorTok{$}\NormalTok{scales)[}\DecValTok{1}\NormalTok{], }\DecValTok{1}\NormalTok{)}
+\NormalTok{adapt_startscales <-}\StringTok{ }\KeywordTok{colMeans}\NormalTok{(mcmc_samples_adapt}\OperatorTok{$}\NormalTok{scales[indeces, ])}
+
+\NormalTok{chronup_samples <-}\StringTok{ }\NormalTok{chronup}\OperatorTok{::}\KeywordTok{regress}\NormalTok{(}\DataTypeTok{Y =}\NormalTok{ rece[span_index, ],}
+                                \DataTypeTok{X =}\NormalTok{ X[span_index, ],}
+                                \DataTypeTok{model =} \StringTok{"nb"}\NormalTok{,}
+                                \DataTypeTok{startvals =}\NormalTok{ adapt_startvals,}
+                                \DataTypeTok{scales =}\NormalTok{ adapt_startscales,}
+                                \DataTypeTok{adapt =}\NormalTok{ F)}
+\KeywordTok{save}\NormalTok{(chronup_samples,}
+        \DataTypeTok{file =} \KeywordTok{paste}\NormalTok{(datapath,}
+                    \StringTok{"mcmc_samples_chronup.RData"}\NormalTok{,}
+                    \DataTypeTok{sep =} \StringTok{""}\NormalTok{))}
+\end{Highlighting}
+\end{Shaded}
+
+\subsection{Comparing results}\label{comparing-results}
+
+Finally, we can compare the results of the two approaches. The key
+parameter of interest is \texttt{beta}. It is the main regression
+coefficient in the models and represents the rate of the conditional
+counting process. In a practical case, it would indicate the growth rate
+(or, conversely, decay rate) of whatever process produced concentrations
+of radiocarbon samples in the sediments excavated during a Palaeo
+Science research project. If covariates other than time are involved,
+the regression coefficients would reflect the impact of those covariates
+on that growth/decay rate.
+
+To see clearly how the two different approaches perform, we will compare
+density estimates based on the posterior samples from the various MCMC
+simulations. Using the following code, a side-by-side comparison can be
+plotted with the help of \texttt{ggplot2}. First, though, we will
+combine the samples into a single long dataframe. We will also discard
+the first 10\% of samples from each as burn-in and scale the density
+estimates to a maximum of one to make visual comparisons easier.
+Initially, plot the densities without any x-axis constraints, but then
+produce the same plot again with the x-axis limits set to focus on the
+area around the target parameter estimate to facilitate comparison.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{load}\NormalTok{(}\KeywordTok{paste}\NormalTok{(datapath,}
+            \StringTok{"mcmc_samples_nimble_5.RData"}\NormalTok{,}
+            \DataTypeTok{sep =} \StringTok{""}\NormalTok{))}
+\KeywordTok{load}\NormalTok{(}\KeywordTok{paste}\NormalTok{(datapath,}
+            \StringTok{"mcmc_samples_nimble_10.RData"}\NormalTok{,}
+            \DataTypeTok{sep =} \StringTok{""}\NormalTok{))}
+\KeywordTok{load}\NormalTok{(}\KeywordTok{paste}\NormalTok{(datapath,}
+            \StringTok{"mcmc_samples_nimble_50.RData"}\NormalTok{,}
+            \DataTypeTok{sep =} \StringTok{""}\NormalTok{))}
+\KeywordTok{load}\NormalTok{(}\KeywordTok{paste}\NormalTok{(datapath,}
+            \StringTok{"mcmc_samples_nimble_100.RData"}\NormalTok{,}
+            \DataTypeTok{sep =} \StringTok{""}\NormalTok{))}
+\KeywordTok{load}\NormalTok{(}\KeywordTok{paste}\NormalTok{(datapath,}
+            \StringTok{"mcmc_samples_chronup.RData"}\NormalTok{,}
+            \DataTypeTok{sep =} \StringTok{""}\NormalTok{))}
+
+\NormalTok{n_hier <-}\StringTok{ }\KeywordTok{dim}\NormalTok{(nimble_samples_}\DecValTok{5}\OperatorTok{$}\NormalTok{samples)[}\DecValTok{1}\NormalTok{]}
+\NormalTok{n_alt <-}\StringTok{ }\KeywordTok{dim}\NormalTok{(chronup_samples)[}\DecValTok{1}\NormalTok{]}
+
+\NormalTok{burnin_hier <-}\StringTok{ }\KeywordTok{floor}\NormalTok{(n_hier }\OperatorTok{*}\StringTok{ }\FloatTok{0.1}\NormalTok{)}
+\NormalTok{burnin_alt <-}\StringTok{ }\KeywordTok{floor}\NormalTok{(n_alt }\OperatorTok{*}\StringTok{ }\FloatTok{0.1}\NormalTok{)}
+
+\NormalTok{iteration_hier <-}\StringTok{ }\NormalTok{(burnin_hier }\OperatorTok{+}\StringTok{ }\DecValTok{1}\NormalTok{)}\OperatorTok{:}\NormalTok{n_hier}
+\NormalTok{iteration_hier_all <-}\StringTok{ }\KeywordTok{rep}\NormalTok{(iteration_hier, }\DecValTok{4}\NormalTok{)}
+\NormalTok{iteration_alt <-}\StringTok{ }\NormalTok{(burnin_alt }\OperatorTok{+}\StringTok{ }\DecValTok{1}\NormalTok{)}\OperatorTok{:}\NormalTok{n_alt}
+
+\NormalTok{n_retained_hier <-}\StringTok{ }\KeywordTok{length}\NormalTok{(iteration_hier)}
+\NormalTok{n_retained_alt <-}\StringTok{ }\KeywordTok{length}\NormalTok{(iteration_alt)}
+
+\NormalTok{plot_samples_hier_}\DecValTok{5}\NormalTok{ <-}\StringTok{ }\NormalTok{nimble_samples_}\DecValTok{5}\OperatorTok{$}\NormalTok{samples[iteration_hier, }\DecValTok{2}\NormalTok{]}
+\NormalTok{plot_samples_hier_}\DecValTok{10}\NormalTok{ <-}\StringTok{ }\NormalTok{nimble_samples_}\DecValTok{10}\OperatorTok{$}\NormalTok{samples[iteration_hier, }\DecValTok{2}\NormalTok{]}
+\NormalTok{plot_samples_hier_}\DecValTok{50}\NormalTok{ <-}\StringTok{ }\NormalTok{nimble_samples_}\DecValTok{50}\OperatorTok{$}\NormalTok{samples[iteration_hier, }\DecValTok{2}\NormalTok{]}
+\NormalTok{plot_samples_hier_}\DecValTok{100}\NormalTok{ <-}\StringTok{ }\NormalTok{nimble_samples_}\DecValTok{100}\OperatorTok{$}\NormalTok{samples[iteration_hier, }\DecValTok{2}\NormalTok{]}
+\NormalTok{plot_samples_hier <-}\StringTok{ }\KeywordTok{c}\NormalTok{(plot_samples_hier_}\DecValTok{5}\NormalTok{,}
+\NormalTok{                    plot_samples_hier_}\DecValTok{10}\NormalTok{,}
+\NormalTok{                    plot_samples_hier_}\DecValTok{50}\NormalTok{,}
+\NormalTok{                    plot_samples_hier_}\DecValTok{100}\NormalTok{)}
+\NormalTok{plot_samples_alt <-}\StringTok{ }\NormalTok{chronup_samples[iteration_alt, }\DecValTok{2}\NormalTok{]}
+
+\NormalTok{model_name_hier <-}\StringTok{ }\KeywordTok{rep}\NormalTok{(}\StringTok{"hier"}\NormalTok{, n_retained_hier }\OperatorTok{*}\StringTok{ }\DecValTok{4}\NormalTok{)}
+\NormalTok{model_name_alt <-}\StringTok{ }\KeywordTok{rep}\NormalTok{(}\StringTok{"alt"}\NormalTok{, n_retained_alt)}
+
+\NormalTok{J_hier <-}\StringTok{ }\KeywordTok{rep}\NormalTok{(}\KeywordTok{c}\NormalTok{(}\StringTok{"5"}\NormalTok{, }\StringTok{"10"}\NormalTok{, }\StringTok{"50"}\NormalTok{, }\StringTok{"100"}\NormalTok{), }\DataTypeTok{each =}\NormalTok{ n_retained_hier)}
+\NormalTok{J_alt <-}\StringTok{ }\KeywordTok{rep}\NormalTok{(}\StringTok{"200000"}\NormalTok{, n_retained_alt)}
+
+\NormalTok{J_both <-}\StringTok{ }\KeywordTok{factor}\NormalTok{(}\KeywordTok{c}\NormalTok{(J_hier, J_alt), }\DataTypeTok{levels =} \KeywordTok{c}\NormalTok{(}\StringTok{"5"}\NormalTok{, }\StringTok{"10"}\NormalTok{, }\StringTok{"50"}\NormalTok{, }\StringTok{"100"}\NormalTok{, }\StringTok{"200000"}\NormalTok{))}
+
+\NormalTok{mcmc_samples_both <-}\StringTok{ }\KeywordTok{data.frame}\NormalTok{(}\DataTypeTok{Iteration =} \KeywordTok{c}\NormalTok{(iteration_hier_all,}
+\NormalTok{                                            iteration_alt),}
+                            \DataTypeTok{Model =} \KeywordTok{c}\NormalTok{(model_name_hier,}
+\NormalTok{                                    model_name_alt),}
+                            \DataTypeTok{J =}\NormalTok{ J_both,}
+                            \DataTypeTok{Beta =} \KeywordTok{c}\NormalTok{(plot_samples_hier,}
+\NormalTok{                                    plot_samples_alt))}
+
+\KeywordTok{ggplot}\NormalTok{(}\DataTypeTok{data =}\NormalTok{ mcmc_samples_both) }\OperatorTok{+}
+\StringTok{    }\KeywordTok{geom_vline}\NormalTok{(}\DataTypeTok{xintercept =}\NormalTok{ beta,}
+                \DataTypeTok{linetype =} \DecValTok{2}\NormalTok{,}
+                \DataTypeTok{alpha =} \FloatTok{0.8}\NormalTok{) }\OperatorTok{+}
+\StringTok{    }\KeywordTok{geom_density}\NormalTok{(}\DataTypeTok{mapping =} \KeywordTok{aes}\NormalTok{(}\DataTypeTok{y =}\NormalTok{ ..scaled.., }\DataTypeTok{x =}\NormalTok{ Beta),}
+                \DataTypeTok{fill =} \StringTok{"steelblue"}\NormalTok{,}
+                \DataTypeTok{alpha =} \FloatTok{0.5}\NormalTok{) }\OperatorTok{+}
+\StringTok{    }\KeywordTok{facet_wrap}\NormalTok{(}\OperatorTok{~}\StringTok{ }\NormalTok{J, }\DataTypeTok{ncol =} \DecValTok{2}\NormalTok{, }\DataTypeTok{scales =} \StringTok{"free"}\NormalTok{) }\OperatorTok{+}
+\StringTok{    }\KeywordTok{theme_minimal}\NormalTok{()}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{replication_files/figure-latex/plot-mcmc-densities-1.pdf}
+
+To make comparisons easier, we can re-produce the same plot, but this
+time limit the x-axis to a region around the target value for \(\beta\)
+and align the plot axes:
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{ggplot}\NormalTok{(}\DataTypeTok{data =}\NormalTok{ mcmc_samples_both) }\OperatorTok{+}
+\StringTok{    }\KeywordTok{geom_vline}\NormalTok{(}\DataTypeTok{xintercept =}\NormalTok{ beta,}
+                \DataTypeTok{linetype =} \DecValTok{2}\NormalTok{,}
+                \DataTypeTok{alpha =} \FloatTok{0.8}\NormalTok{) }\OperatorTok{+}
+\StringTok{    }\KeywordTok{geom_density}\NormalTok{(}\DataTypeTok{mapping =} \KeywordTok{aes}\NormalTok{(}\DataTypeTok{y =}\NormalTok{ ..scaled.., }\DataTypeTok{x =}\NormalTok{ Beta),}
+                \DataTypeTok{fill =} \StringTok{"steelblue"}\NormalTok{,}
+                \DataTypeTok{alpha =} \FloatTok{0.5}\NormalTok{) }\OperatorTok{+}
+\StringTok{    }\KeywordTok{facet_wrap}\NormalTok{(}\OperatorTok{~}\StringTok{ }\NormalTok{J, }\DataTypeTok{ncol =} \DecValTok{2}\NormalTok{, }\DataTypeTok{scales =} \StringTok{"free"}\NormalTok{) }\OperatorTok{+}
+\StringTok{    }\KeywordTok{scale_x_continuous}\NormalTok{(}\DataTypeTok{limits =} \KeywordTok{c}\NormalTok{(}\FloatTok{0.001}\NormalTok{, }\FloatTok{0.007}\NormalTok{)) }\OperatorTok{+}
+\StringTok{    }\KeywordTok{theme_minimal}\NormalTok{()}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## Warning: Removed 31 rows containing non-finite values (stat_density).
+\end{verbatim}
+
+\includegraphics{replication_files/figure-latex/plot-mcmc-densities2-1.pdf}
+
+Lastly, we should also inspect the mcmc trace plots for each
+model/estimate, and then check the Geweke statistics for the main
+parameters,
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{ggplot}\NormalTok{(}\DataTypeTok{data =}\NormalTok{ mcmc_samples_both) }\OperatorTok{+}
+\StringTok{    }\KeywordTok{geom_hline}\NormalTok{(}\DataTypeTok{yintercept =}\NormalTok{ beta,}
+                \DataTypeTok{linetype =} \DecValTok{2}\NormalTok{,}
+                \DataTypeTok{alpha =} \FloatTok{0.8}\NormalTok{) }\OperatorTok{+}
+\StringTok{    }\KeywordTok{geom_path}\NormalTok{(}\DataTypeTok{mapping =} \KeywordTok{aes}\NormalTok{(}\DataTypeTok{y =}\NormalTok{ Beta, }\DataTypeTok{x =}\NormalTok{ Iteration),}
+                \DataTypeTok{alpha =} \FloatTok{0.85}\NormalTok{) }\OperatorTok{+}
+\StringTok{    }\KeywordTok{facet_wrap}\NormalTok{(}\OperatorTok{~}\StringTok{ }\NormalTok{J, }\DataTypeTok{ncol =} \DecValTok{2}\NormalTok{, }\DataTypeTok{scales =} \StringTok{"free"}\NormalTok{) }\OperatorTok{+}
+\StringTok{    }\KeywordTok{theme_minimal}\NormalTok{()}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{replication_files/figure-latex/plot-mcmc-trace-1.pdf}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{geweke.diag}\NormalTok{(}\KeywordTok{cbind}\NormalTok{(plot_samples_hier_}\DecValTok{5}\NormalTok{,}
+\NormalTok{                plot_samples_hier_}\DecValTok{10}\NormalTok{,}
+\NormalTok{                plot_samples_hier_}\DecValTok{50}\NormalTok{,}
+\NormalTok{                plot_samples_hier_}\DecValTok{100}\NormalTok{,}
+\NormalTok{                plot_samples_alt))}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## Warning in cbind(plot_samples_hier_5, plot_samples_hier_10,
+## plot_samples_hier_50, : number of rows of result is not a multiple of vector
+## length (arg 1)
+\end{verbatim}
+
+\begin{verbatim}
+## 
+## Fraction in 1st window = 0.1
+## Fraction in 2nd window = 0.5 
+## 
+##   plot_samples_hier_5  plot_samples_hier_10  plot_samples_hier_50 
+##                0.5707               -0.4789                0.5714 
+## plot_samples_hier_100      plot_samples_alt 
+##                0.8431                0.1215
+\end{verbatim}
+
+As the plots show, both methods yielded estimates for \texttt{beta} that
+either include the true value (0.004, indicated by the vertical dashed
+line) within their 99\% and/or 95\% credible intervals or are at least
+quite close. But, the hierarchical model (\texttt{heir} in the plot
+legend) produced posterior density estimates with a much lower variance
+than the alternate method and can occasionally exclude the target value
+when large samples of probable sequences are involved (i.e., \texttt{J}
+is large).
+
+\subsection{Sample Size}\label{sample-size}
+
+A feature of hierarchical models is that they allow for borrowing of
+information across samples. This leads to a phenomenon sometimes called
+``shrinkage'' whereby the variance in the posterior density for model
+parameters tends to be smaller than the variance of the same parameters
+estimated separately for each data sample. This appears to be happening
+with the posteriors of the hierarchical REC model estimated in Nimble.
+And, as the size of the sample (i.e., \texttt{J}, referring to the
+number of probable count sequences analyzed) increases, the variance of
+the posterior densities decreases, as shown in the plots above. A bias
+is being introduced because a single \(\beta\) parameter is being used
+to estimate the likelihoods of all \texttt{J} probable regression models
+simultaneously, which results in the estimates for \(\beta_j\) being
+pulled together. This convergence, in turn, leads to a lower variance in
+the upper level hyperparameter for \(\beta\)'s mean. Any lingering bias
+in the underlying event sample, though, will cause that mean estimate to
+deviate from the true underlying value. Subsequently, the hyperparameter
+estimate for the target value will be a slightly biased, but
+high-precision estimate.
+
+To see the phenomenon more clearly, we can run an additional analysis
+that involves a larger sample of dates. Whereas before a sample of 1000
+dates was drawn from the simulated process, we can instead draw 5000
+dates and re-run some of the analyses from above. The larger sample will
+reduce the effect of sampling bias, and we should see an improvement in
+the hierarchical model's estimate of the target value (\(\beta\)). It
+will, however, likely still have a bias (from sampling and perhaps the
+effect of chronological uncertainty on count sequences) and a lower
+variance than either those involving a smaller sample of probable
+sequences or a similar analysis conducted using the alternative sampling
+framework implemented with \texttt{chronup}.
+
+First, draw more samples from the simulation process,
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{nevents <-}\StringTok{ }\DecValTok{5000}
+\NormalTok{nsamples <-}\StringTok{ }\DecValTok{200000}
+\NormalTok{tau <-}\StringTok{ }\DecValTok{1000}
+\NormalTok{beta <-}\StringTok{ }\FloatTok{0.004}
+\NormalTok{x <-}\StringTok{ }\DecValTok{0}\OperatorTok{:}\NormalTok{(tau }\OperatorTok{-}\StringTok{ }\DecValTok{1}\NormalTok{)}
+\NormalTok{lambda <-}\StringTok{ }\KeywordTok{exp}\NormalTok{(beta }\OperatorTok{*}\StringTok{ }\NormalTok{x)}
+\NormalTok{start <-}\StringTok{ }\DecValTok{5000}
+\NormalTok{end <-}\StringTok{ }\NormalTok{(start }\OperatorTok{-}\StringTok{ }\NormalTok{tau) }\OperatorTok{+}\StringTok{ }\DecValTok{1}
+\NormalTok{times <-}\StringTok{ }\NormalTok{start}\OperatorTok{:}\NormalTok{end}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{simdata3 <-}\StringTok{ }\NormalTok{chronup}\OperatorTok{::}\KeywordTok{simulate_event_counts}\NormalTok{(}\DataTypeTok{process =}\NormalTok{ lambda,}
+                                            \DataTypeTok{times =}\NormalTok{ times,}
+                                            \DataTypeTok{nevents =}\NormalTok{ nevents,}
+                                            \DataTypeTok{nsamples =}\NormalTok{ nsamples,}
+                                            \DataTypeTok{binning_resolution =} \DecValTok{-10}\NormalTok{,}
+                                            \DataTypeTok{bigmatrix =}\NormalTok{ datapath,}
+                                            \DataTypeTok{bigfileprefix =} \StringTok{"count_big"}\NormalTok{)}
+\KeywordTok{save}\NormalTok{(simdata3,}
+    \DataTypeTok{file =} \KeywordTok{paste}\NormalTok{(datapath,}
+                \StringTok{"simdata3.RData"}\NormalTok{,}
+                \DataTypeTok{sep =} \StringTok{""}\NormalTok{))}
+\end{Highlighting}
+\end{Shaded}
+
+Next, setup and run a Nimble model as before,
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{library}\NormalTok{(nimble)}
+
+\KeywordTok{load}\NormalTok{(}\KeywordTok{paste}\NormalTok{(datapath,}
+        \StringTok{"simdata3.RData"}\NormalTok{,}
+        \DataTypeTok{sep =} \StringTok{""}\NormalTok{))}
+
+\NormalTok{rece <-}\StringTok{ }\NormalTok{bigmemory}\OperatorTok{::}\KeywordTok{attach.big.matrix}\NormalTok{(simdata3}\OperatorTok{$}\NormalTok{count_ensemble)}
+\NormalTok{X <-}\StringTok{ }\NormalTok{bigmemory}\OperatorTok{::}\KeywordTok{attach.big.matrix}\NormalTok{(}\KeywordTok{paste}\NormalTok{(datapath,}
+                                \StringTok{"X_mat_desc"}\NormalTok{,}
+                                \DataTypeTok{sep =} \StringTok{""}\NormalTok{))}
+
+\NormalTok{nbCode <-}\StringTok{ }\KeywordTok{nimbleCode}\NormalTok{(\{}
+\NormalTok{   ###top-level regression}
+\NormalTok{   B0 }\OperatorTok{~}\StringTok{ }\KeywordTok{dnorm}\NormalTok{(}\DecValTok{0}\NormalTok{, }\DecValTok{100}\NormalTok{)}
+\NormalTok{   B1 }\OperatorTok{~}\StringTok{ }\KeywordTok{dnorm}\NormalTok{(}\DecValTok{0}\NormalTok{, }\DecValTok{100}\NormalTok{)}
+\NormalTok{   sigB0 }\OperatorTok{~}\StringTok{ }\KeywordTok{dunif}\NormalTok{(}\FloatTok{1e-10}\NormalTok{, }\DecValTok{100}\NormalTok{)}
+\NormalTok{   sigB1 }\OperatorTok{~}\StringTok{ }\KeywordTok{dunif}\NormalTok{(}\FloatTok{1e-10}\NormalTok{, }\DecValTok{100}\NormalTok{)}
+   \ControlFlowTok{for}\NormalTok{ (j }\ControlFlowTok{in} \DecValTok{1}\OperatorTok{:}\NormalTok{J) \{}
+\NormalTok{      ###low-level regression}
+\NormalTok{      b0[j] }\OperatorTok{~}\StringTok{ }\KeywordTok{dnorm}\NormalTok{(}\DataTypeTok{mean =}\NormalTok{ B0, }\DataTypeTok{sd =}\NormalTok{ sigB0)}
+\NormalTok{      b1[j] }\OperatorTok{~}\StringTok{ }\KeywordTok{dnorm}\NormalTok{(}\DataTypeTok{mean =}\NormalTok{ B1, }\DataTypeTok{sd =}\NormalTok{ sigB1)}
+      \ControlFlowTok{for}\NormalTok{ (n }\ControlFlowTok{in} \DecValTok{1}\OperatorTok{:}\NormalTok{N)\{}
+\NormalTok{        p[n, j] }\OperatorTok{~}\StringTok{ }\KeywordTok{dunif}\NormalTok{(}\FloatTok{1e-10}\NormalTok{, }\DecValTok{1}\NormalTok{)}
+\NormalTok{        r[n, j] <-}\StringTok{ }\KeywordTok{exp}\NormalTok{(b0[j] }\OperatorTok{+}\StringTok{ }\NormalTok{X[n, j] }\OperatorTok{*}\StringTok{ }\NormalTok{b1[j])}
+\NormalTok{        Y[n, j] }\OperatorTok{~}\StringTok{ }\KeywordTok{dnegbin}\NormalTok{(}\DataTypeTok{size =}\NormalTok{ r[n, j], }\DataTypeTok{prob =}\NormalTok{ p[n, j])}
+\NormalTok{      \}}
+\NormalTok{   \}}
+\NormalTok{\})}
+
+\NormalTok{span_index <-}\StringTok{ }\KeywordTok{which}\NormalTok{(simdata2}\OperatorTok{$}\NormalTok{new_timestamps }\OperatorTok{<=}\StringTok{ }\NormalTok{start }\OperatorTok{&}
+\StringTok{                    }\NormalTok{simdata2}\OperatorTok{$}\NormalTok{new_timestamps }\OperatorTok{>=}\StringTok{ }\NormalTok{end)}
+\NormalTok{n <-}\StringTok{ }\KeywordTok{length}\NormalTok{(span_index)}
+
+\NormalTok{J =}\StringTok{ }\DecValTok{5}
+
+\NormalTok{y_sample <-}\StringTok{ }\KeywordTok{sample}\NormalTok{(}\DecValTok{1}\OperatorTok{:}\KeywordTok{dim}\NormalTok{(rece)[}\DecValTok{2}\NormalTok{],}
+                \DataTypeTok{size =}\NormalTok{ J,}
+                \DataTypeTok{replace =}\NormalTok{ F)}
+\NormalTok{x_sample <-}\StringTok{ }\KeywordTok{sample}\NormalTok{(}\KeywordTok{seq}\NormalTok{(}\DecValTok{2}\NormalTok{, }\KeywordTok{dim}\NormalTok{(rece)[}\DecValTok{2}\NormalTok{], }\DecValTok{2}\NormalTok{),}
+                \DataTypeTok{size =}\NormalTok{ J,}
+                \DataTypeTok{replace =}\NormalTok{ F)}
+
+\NormalTok{nbData <-}\StringTok{ }\KeywordTok{list}\NormalTok{(}\DataTypeTok{Y =}\NormalTok{ rece[span_index, y_sample],}
+                \DataTypeTok{X =}\NormalTok{ X[span_index, x_sample])}
+
+\NormalTok{nbConsts <-}\StringTok{ }\KeywordTok{list}\NormalTok{(}\DataTypeTok{N =}\NormalTok{ n,}
+                \DataTypeTok{J =}\NormalTok{ J)}
+
+\NormalTok{nbInits <-}\StringTok{ }\KeywordTok{list}\NormalTok{(}\DataTypeTok{B0 =} \DecValTok{0}\NormalTok{,}
+                \DataTypeTok{B1 =} \DecValTok{0}\NormalTok{,}
+                \DataTypeTok{b0 =} \KeywordTok{rep}\NormalTok{(}\DecValTok{0}\NormalTok{, J),}
+                \DataTypeTok{b1 =} \KeywordTok{rep}\NormalTok{(}\DecValTok{0}\NormalTok{, J),}
+                \DataTypeTok{sigB0 =} \FloatTok{0.0001}\NormalTok{,}
+                \DataTypeTok{sigB1 =} \FloatTok{0.0001}\NormalTok{)}
+
+\NormalTok{nbModel <-}\StringTok{ }\KeywordTok{nimbleModel}\NormalTok{(}\DataTypeTok{code =}\NormalTok{ nbCode,}
+                        \DataTypeTok{data =}\NormalTok{ nbData,}
+                        \DataTypeTok{inits =}\NormalTok{ nbInits,}
+                        \DataTypeTok{constants =}\NormalTok{ nbConsts)}
+
+\CommentTok{#compile nimble model to C++ code—much faster runtime}
+\NormalTok{C_nbModel <-}\StringTok{ }\KeywordTok{compileNimble}\NormalTok{(nbModel, }\DataTypeTok{showCompilerOutput =} \OtherTok{FALSE}\NormalTok{)}
+
+\CommentTok{#configure the MCMC}
+\NormalTok{nbModel_conf <-}\StringTok{ }\KeywordTok{configureMCMC}\NormalTok{(nbModel)}
+
+\NormalTok{nbModel_conf}\OperatorTok{$}\NormalTok{monitors <-}\StringTok{ }\KeywordTok{c}\NormalTok{(}\StringTok{"B0"}\NormalTok{, }\StringTok{"B1"}\NormalTok{, }\StringTok{"sigB0"}\NormalTok{, }\StringTok{"sigB1"}\NormalTok{)}
+\NormalTok{nbModel_conf}\OperatorTok{$}\KeywordTok{addMonitors2}\NormalTok{(}\KeywordTok{c}\NormalTok{(}\StringTok{"b0"}\NormalTok{, }\StringTok{"b1"}\NormalTok{))}
+
+\CommentTok{#samplers}
+\NormalTok{nbModel_conf}\OperatorTok{$}\KeywordTok{removeSamplers}\NormalTok{(}\KeywordTok{c}\NormalTok{(}\StringTok{"B0"}\NormalTok{, }\StringTok{"B1"}\NormalTok{, }\StringTok{"sigB0"}\NormalTok{, }\StringTok{"sigB1"}\NormalTok{, }\StringTok{"b0"}\NormalTok{, }\StringTok{"b1"}\NormalTok{))}
+\NormalTok{nbModel_conf}\OperatorTok{$}\KeywordTok{addSampler}\NormalTok{(}\DataTypeTok{target =} \KeywordTok{c}\NormalTok{(}\StringTok{"B0"}\NormalTok{, }\StringTok{"B1"}\NormalTok{, }\StringTok{"sigB0"}\NormalTok{, }\StringTok{"sigB1"}\NormalTok{),}
+                        \DataTypeTok{type =} \StringTok{"AF_slice"}\NormalTok{)}
+\ControlFlowTok{for}\NormalTok{(j }\ControlFlowTok{in} \DecValTok{1}\OperatorTok{:}\NormalTok{J)\{}
+\NormalTok{   nbModel_conf}\OperatorTok{$}\KeywordTok{addSampler}\NormalTok{(}\DataTypeTok{target =} \KeywordTok{c}\NormalTok{(}\KeywordTok{paste}\NormalTok{(}\StringTok{"b0["}\NormalTok{, j, }\StringTok{"]"}\NormalTok{, }\DataTypeTok{sep =} \StringTok{""}\NormalTok{),}
+                                    \KeywordTok{paste}\NormalTok{(}\StringTok{"b1["}\NormalTok{, j, }\StringTok{"]"}\NormalTok{, }\DataTypeTok{sep =} \StringTok{""}\NormalTok{)),}
+                        \DataTypeTok{type =} \StringTok{"AF_slice"}\NormalTok{)}
+\NormalTok{\}}
+
+\CommentTok{#thinning to conserve memory when the samples are saved below}
+\NormalTok{thinning <-}\StringTok{ }\DecValTok{10}
+\NormalTok{nbModel_conf}\OperatorTok{$}\KeywordTok{setThin}\NormalTok{(thinning)}
+\NormalTok{nbModel_conf}\OperatorTok{$}\KeywordTok{setThin2}\NormalTok{(thinning)}
+
+\KeywordTok{set.seed}\NormalTok{(}\DecValTok{1}\NormalTok{)}
+
+\CommentTok{#build MCMC}
+\NormalTok{nbModelMCMC <-}\StringTok{ }\KeywordTok{buildMCMC}\NormalTok{(nbModel_conf)}
+
+\CommentTok{#compile MCMC to C++—much faster}
+\NormalTok{C_nbModelMCMC <-}\StringTok{ }\KeywordTok{compileNimble}\NormalTok{(nbModelMCMC, }\DataTypeTok{project =}\NormalTok{ nbModel)}
+
+\NormalTok{niter <-}\StringTok{ }\DecValTok{100000}
+
+\CommentTok{#save the MCMC chain (monitored variables) as a matrix}
+\NormalTok{nimble_samples_big <-}\StringTok{ }\KeywordTok{runMCMC}\NormalTok{(C_nbModelMCMC, }\DataTypeTok{niter =}\NormalTok{ niter)}
+
+\CommentTok{#save samples}
+\KeywordTok{save}\NormalTok{(nimble_samples_big,}
+        \DataTypeTok{file =} \KeywordTok{paste}\NormalTok{(datapath,}
+                    \StringTok{"mcmc_samples_nimble_big.RData"}\NormalTok{,}
+                    \DataTypeTok{sep =} \StringTok{""}\NormalTok{))}
+\end{Highlighting}
+\end{Shaded}
+
+Next, run the \texttt{chronup} analysis on the same large-sample
+dataset,
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{load}\NormalTok{(}\KeywordTok{paste}\NormalTok{(datapath,}
+        \StringTok{"simdata3.RData"}\NormalTok{,}
+        \DataTypeTok{sep =} \StringTok{""}\NormalTok{))}
+
+\NormalTok{rece <-}\StringTok{ }\NormalTok{bigmemory}\OperatorTok{::}\KeywordTok{attach.big.matrix}\NormalTok{(simdata3}\OperatorTok{$}\NormalTok{count_ensemble)}
+\NormalTok{X <-}\StringTok{ }\NormalTok{bigmemory}\OperatorTok{::}\KeywordTok{attach.big.matrix}\NormalTok{(}\KeywordTok{paste}\NormalTok{(datapath,}
+                                \StringTok{"X_mat_desc"}\NormalTok{,}
+                                \DataTypeTok{sep =} \StringTok{""}\NormalTok{))}
+
+\NormalTok{nsamples <-}\StringTok{ }\KeywordTok{dim}\NormalTok{(rece)[}\DecValTok{2}\NormalTok{]}
+
+\NormalTok{span_index <-}\StringTok{ }\KeywordTok{which}\NormalTok{(simdata3}\OperatorTok{$}\NormalTok{new_timestamps }\OperatorTok{<=}\StringTok{ }\NormalTok{start }\OperatorTok{&}
+\StringTok{                    }\NormalTok{simdata3}\OperatorTok{$}\NormalTok{new_timestamps }\OperatorTok{>=}\StringTok{ }\NormalTok{end)}
+
+\NormalTok{N <-}\StringTok{ }\KeywordTok{length}\NormalTok{(span_index)}
+
+\NormalTok{startvals <-}\StringTok{ }\KeywordTok{c}\NormalTok{(}\DecValTok{0}\NormalTok{, }\DecValTok{0}\NormalTok{, }\KeywordTok{rep}\NormalTok{(}\FloatTok{0.1}\NormalTok{, N))}
+\NormalTok{startscales <-}\StringTok{ }\KeywordTok{c}\NormalTok{(}\FloatTok{0.1}\NormalTok{, }\FloatTok{0.0002}\NormalTok{, }\KeywordTok{rep}\NormalTok{(}\FloatTok{0.5}\NormalTok{, N))}
+
+\NormalTok{adapt_limit <-}\StringTok{ }\KeywordTok{floor}\NormalTok{(nsamples }\OperatorTok{*}\StringTok{ }\FloatTok{0.25}\NormalTok{)}
+
+\NormalTok{adapt_sample_y <-}\StringTok{ }\DecValTok{1}\OperatorTok{:}\NormalTok{adapt_limit}
+\NormalTok{adapt_sample_x <-}\StringTok{ }\DecValTok{1}\OperatorTok{:}\NormalTok{(adapt_limit }\OperatorTok{*}\StringTok{ }\DecValTok{2}\NormalTok{)}
+
+\NormalTok{mcmc_samples_adapt <-}\StringTok{ }\NormalTok{chronup}\OperatorTok{::}\KeywordTok{regress}\NormalTok{(}\DataTypeTok{Y =}\NormalTok{ rece[span_index, adapt_sample_y],}
+                                        \DataTypeTok{X =}\NormalTok{ X[span_index, adapt_sample_x],}
+                                        \DataTypeTok{model =} \StringTok{"nb"}\NormalTok{,}
+                                        \DataTypeTok{startvals =}\NormalTok{ startvals,}
+                                        \DataTypeTok{scales =}\NormalTok{ startscales,}
+                                        \DataTypeTok{adapt =}\NormalTok{ T)}
+
+\NormalTok{burnin <-}\StringTok{ }\KeywordTok{floor}\NormalTok{(}\KeywordTok{dim}\NormalTok{(mcmc_samples_adapt}\OperatorTok{$}\NormalTok{samples)[}\DecValTok{1}\NormalTok{] }\OperatorTok{*}\StringTok{ }\FloatTok{0.2}\NormalTok{)}
+\NormalTok{indeces <-}\StringTok{ }\KeywordTok{seq}\NormalTok{(burnin, }\KeywordTok{dim}\NormalTok{(mcmc_samples_adapt}\OperatorTok{$}\NormalTok{samples)[}\DecValTok{1}\NormalTok{], }\DecValTok{1}\NormalTok{)}
+\NormalTok{adapt_startvals <-}\StringTok{ }\KeywordTok{colMeans}\NormalTok{(mcmc_samples_adapt}\OperatorTok{$}\NormalTok{samples[indeces, ])}
+
+\NormalTok{burnin <-}\StringTok{ }\KeywordTok{floor}\NormalTok{(}\KeywordTok{dim}\NormalTok{(mcmc_samples_adapt}\OperatorTok{$}\NormalTok{scales)[}\DecValTok{1}\NormalTok{] }\OperatorTok{*}\StringTok{ }\FloatTok{0.2}\NormalTok{)}
+\NormalTok{indeces <-}\StringTok{ }\KeywordTok{seq}\NormalTok{(burnin, }\KeywordTok{dim}\NormalTok{(mcmc_samples_adapt}\OperatorTok{$}\NormalTok{scales)[}\DecValTok{1}\NormalTok{], }\DecValTok{1}\NormalTok{)}
+\NormalTok{adapt_startscales <-}\StringTok{ }\KeywordTok{colMeans}\NormalTok{(mcmc_samples_adapt}\OperatorTok{$}\NormalTok{scales[indeces, ])}
+
+\NormalTok{chronup_samples_big <-}\StringTok{ }\NormalTok{chronup}\OperatorTok{::}\KeywordTok{regress}\NormalTok{(}\DataTypeTok{Y =}\NormalTok{ rece[span_index, ],}
+                                \DataTypeTok{X =}\NormalTok{ X[span_index, ],}
+                                \DataTypeTok{model =} \StringTok{"nb"}\NormalTok{,}
+                                \DataTypeTok{startvals =}\NormalTok{ adapt_startvals,}
+                                \DataTypeTok{scales =}\NormalTok{ adapt_startscales,}
+                                \DataTypeTok{adapt =}\NormalTok{ F)}
+\KeywordTok{save}\NormalTok{(chronup_samples_big,}
+        \DataTypeTok{file =} \KeywordTok{paste}\NormalTok{(datapath,}
+                    \StringTok{"mcmc_samples_chronup_big.RData"}\NormalTok{,}
+                    \DataTypeTok{sep =} \StringTok{""}\NormalTok{))}
+\end{Highlighting}
+\end{Shaded}
+
+Then, like last time, plot the results,
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{load}\NormalTok{(}\KeywordTok{paste}\NormalTok{(datapath,}
+            \StringTok{"mcmc_samples_nimble_5_big.RData"}\NormalTok{,}
+            \DataTypeTok{sep =} \StringTok{""}\NormalTok{))}
+\KeywordTok{load}\NormalTok{(}\KeywordTok{paste}\NormalTok{(datapath,}
+            \StringTok{"mcmc_samples_nimble_10_big.RData"}\NormalTok{,}
+            \DataTypeTok{sep =} \StringTok{""}\NormalTok{))}
+\KeywordTok{load}\NormalTok{(}\KeywordTok{paste}\NormalTok{(datapath,}
+            \StringTok{"mcmc_samples_nimble_50_big.RData"}\NormalTok{,}
+            \DataTypeTok{sep =} \StringTok{""}\NormalTok{))}
+\KeywordTok{load}\NormalTok{(}\KeywordTok{paste}\NormalTok{(datapath,}
+            \StringTok{"mcmc_samples_nimble_100_big.RData"}\NormalTok{,}
+            \DataTypeTok{sep =} \StringTok{""}\NormalTok{))}
+\KeywordTok{load}\NormalTok{(}\KeywordTok{paste}\NormalTok{(datapath,}
+            \StringTok{"mcmc_samples_chronup_big.RData"}\NormalTok{,}
+            \DataTypeTok{sep =} \StringTok{""}\NormalTok{))}
+
+\NormalTok{n_hier <-}\StringTok{ }\KeywordTok{dim}\NormalTok{(nimble_samples_}\DecValTok{5}\NormalTok{_big}\OperatorTok{$}\NormalTok{samples)[}\DecValTok{1}\NormalTok{]}
+\NormalTok{n_alt <-}\StringTok{ }\KeywordTok{dim}\NormalTok{(chronup_samples_big)[}\DecValTok{1}\NormalTok{]}
+
+\NormalTok{burnin_hier <-}\StringTok{ }\KeywordTok{floor}\NormalTok{(n_hier }\OperatorTok{*}\StringTok{ }\FloatTok{0.1}\NormalTok{)}
+\NormalTok{burnin_alt <-}\StringTok{ }\KeywordTok{floor}\NormalTok{(n_alt }\OperatorTok{*}\StringTok{ }\FloatTok{0.1}\NormalTok{)}
+
+\NormalTok{iteration_hier <-}\StringTok{ }\NormalTok{(burnin_hier }\OperatorTok{+}\StringTok{ }\DecValTok{1}\NormalTok{)}\OperatorTok{:}\NormalTok{n_hier}
+\NormalTok{iteration_hier_all <-}\StringTok{ }\KeywordTok{rep}\NormalTok{(iteration_hier, }\DecValTok{4}\NormalTok{)}
+\NormalTok{iteration_alt <-}\StringTok{ }\NormalTok{(burnin_alt }\OperatorTok{+}\StringTok{ }\DecValTok{1}\NormalTok{)}\OperatorTok{:}\NormalTok{n_alt}
+
+\NormalTok{n_retained_hier <-}\StringTok{ }\KeywordTok{length}\NormalTok{(iteration_hier)}
+\NormalTok{n_retained_alt <-}\StringTok{ }\KeywordTok{length}\NormalTok{(iteration_alt)}
+
+\NormalTok{plot_samples_hier_}\DecValTok{5}\NormalTok{ <-}\StringTok{ }\NormalTok{nimble_samples_}\DecValTok{5}\NormalTok{_big}\OperatorTok{$}\NormalTok{samples[iteration_hier, }\DecValTok{2}\NormalTok{]}
+\NormalTok{plot_samples_hier_}\DecValTok{10}\NormalTok{ <-}\StringTok{ }\NormalTok{nimble_samples_}\DecValTok{10}\NormalTok{_big}\OperatorTok{$}\NormalTok{samples[iteration_hier, }\DecValTok{2}\NormalTok{]}
+\NormalTok{plot_samples_hier_}\DecValTok{50}\NormalTok{ <-}\StringTok{ }\NormalTok{nimble_samples_}\DecValTok{50}\NormalTok{_big}\OperatorTok{$}\NormalTok{samples[iteration_hier, }\DecValTok{2}\NormalTok{]}
+\NormalTok{plot_samples_hier_}\DecValTok{100}\NormalTok{ <-}\StringTok{ }\NormalTok{nimble_samples_}\DecValTok{100}\NormalTok{_big}\OperatorTok{$}\NormalTok{samples[iteration_hier, }\DecValTok{2}\NormalTok{]}
+\NormalTok{plot_samples_hier <-}\StringTok{ }\KeywordTok{c}\NormalTok{(plot_samples_hier_}\DecValTok{5}\NormalTok{,}
+\NormalTok{                    plot_samples_hier_}\DecValTok{10}\NormalTok{,}
+\NormalTok{                    plot_samples_hier_}\DecValTok{50}\NormalTok{,}
+\NormalTok{                    plot_samples_hier_}\DecValTok{100}\NormalTok{)}
+\NormalTok{plot_samples_alt <-}\StringTok{ }\NormalTok{chronup_samples_big[iteration_alt, }\DecValTok{2}\NormalTok{]}
+
+\NormalTok{model_name_hier <-}\StringTok{ }\KeywordTok{rep}\NormalTok{(}\StringTok{"hier"}\NormalTok{, n_retained_hier }\OperatorTok{*}\StringTok{ }\DecValTok{4}\NormalTok{)}
+\NormalTok{model_name_alt <-}\StringTok{ }\KeywordTok{rep}\NormalTok{(}\StringTok{"alt"}\NormalTok{, n_retained_alt)}
+
+\NormalTok{J_hier <-}\StringTok{ }\KeywordTok{rep}\NormalTok{(}\KeywordTok{c}\NormalTok{(}\StringTok{"5"}\NormalTok{, }\StringTok{"10"}\NormalTok{, }\StringTok{"50"}\NormalTok{, }\StringTok{"100"}\NormalTok{), }\DataTypeTok{each =}\NormalTok{ n_retained_hier)}
+\NormalTok{J_alt <-}\StringTok{ }\KeywordTok{rep}\NormalTok{(}\StringTok{"200000"}\NormalTok{, n_retained_alt)}
+
+\NormalTok{J_both <-}\StringTok{ }\KeywordTok{factor}\NormalTok{(}\KeywordTok{c}\NormalTok{(J_hier, J_alt), }\DataTypeTok{levels =} \KeywordTok{c}\NormalTok{(}\StringTok{"5"}\NormalTok{, }\StringTok{"10"}\NormalTok{, }\StringTok{"50"}\NormalTok{, }\StringTok{"100"}\NormalTok{, }\StringTok{"200000"}\NormalTok{))}
+
+\NormalTok{mcmc_samples_both <-}\StringTok{ }\KeywordTok{data.frame}\NormalTok{(}\DataTypeTok{Iteration =} \KeywordTok{c}\NormalTok{(iteration_hier_all,}
+\NormalTok{                                            iteration_alt),}
+                            \DataTypeTok{Model =} \KeywordTok{c}\NormalTok{(model_name_hier,}
+\NormalTok{                                    model_name_alt),}
+                            \DataTypeTok{J =}\NormalTok{ J_both,}
+                            \DataTypeTok{Beta =} \KeywordTok{c}\NormalTok{(plot_samples_hier,}
+\NormalTok{                                    plot_samples_alt))}
+
+\KeywordTok{ggplot}\NormalTok{(}\DataTypeTok{data =}\NormalTok{ mcmc_samples_both) }\OperatorTok{+}
+\StringTok{    }\KeywordTok{geom_vline}\NormalTok{(}\DataTypeTok{xintercept =}\NormalTok{ beta,}
+                \DataTypeTok{linetype =} \DecValTok{2}\NormalTok{,}
+                \DataTypeTok{alpha =} \FloatTok{0.8}\NormalTok{) }\OperatorTok{+}
+\StringTok{    }\KeywordTok{geom_density}\NormalTok{(}\DataTypeTok{mapping =} \KeywordTok{aes}\NormalTok{(}\DataTypeTok{y =}\NormalTok{ ..scaled.., }\DataTypeTok{x =}\NormalTok{ Beta),}
+                \DataTypeTok{fill =} \StringTok{"steelblue"}\NormalTok{,}
+                \DataTypeTok{alpha =} \FloatTok{0.5}\NormalTok{) }\OperatorTok{+}
+\StringTok{    }\KeywordTok{facet_wrap}\NormalTok{(}\OperatorTok{~}\StringTok{ }\NormalTok{J, }\DataTypeTok{ncol =} \DecValTok{2}\NormalTok{, }\DataTypeTok{scales =} \StringTok{"free"}\NormalTok{) }\OperatorTok{+}
+\StringTok{    }\KeywordTok{theme_minimal}\NormalTok{()}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{replication_files/figure-latex/plot-mcmc-densities-big-1.pdf}
+
+As before, to make comparisons easier, we can re-produce the same plot,
+but this time limit the x-axis to a region around the target value for
+\(\beta\) and align the plot axes:
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{ggplot}\NormalTok{(}\DataTypeTok{data =}\NormalTok{ mcmc_samples_both) }\OperatorTok{+}
+\StringTok{    }\KeywordTok{geom_vline}\NormalTok{(}\DataTypeTok{xintercept =}\NormalTok{ beta,}
+                \DataTypeTok{linetype =} \DecValTok{2}\NormalTok{,}
+                \DataTypeTok{alpha =} \FloatTok{0.8}\NormalTok{) }\OperatorTok{+}
+\StringTok{    }\KeywordTok{geom_density}\NormalTok{(}\DataTypeTok{mapping =} \KeywordTok{aes}\NormalTok{(}\DataTypeTok{y =}\NormalTok{ ..scaled.., }\DataTypeTok{x =}\NormalTok{ Beta),}
+                \DataTypeTok{fill =} \StringTok{"steelblue"}\NormalTok{,}
+                \DataTypeTok{alpha =} \FloatTok{0.5}\NormalTok{) }\OperatorTok{+}
+\StringTok{    }\KeywordTok{facet_wrap}\NormalTok{(}\OperatorTok{~}\StringTok{ }\NormalTok{J, }\DataTypeTok{ncol =} \DecValTok{2}\NormalTok{, }\DataTypeTok{scales =} \StringTok{"free"}\NormalTok{) }\OperatorTok{+}
+\StringTok{    }\KeywordTok{scale_x_continuous}\NormalTok{(}\DataTypeTok{limits =} \KeywordTok{c}\NormalTok{(}\FloatTok{0.001}\NormalTok{, }\FloatTok{0.007}\NormalTok{)) }\OperatorTok{+}
+\StringTok{    }\KeywordTok{theme_minimal}\NormalTok{()}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{replication_files/figure-latex/plot-mcmc-densities2-big-1.pdf}
+
+Lastly, we should also inspect the mcmc trace plots for each
+model/estimate, and then examine the Geweke statistics for the main
+parameter,
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{ggplot}\NormalTok{(}\DataTypeTok{data =}\NormalTok{ mcmc_samples_both) }\OperatorTok{+}
+\StringTok{    }\KeywordTok{geom_hline}\NormalTok{(}\DataTypeTok{yintercept =}\NormalTok{ beta,}
+                \DataTypeTok{linetype =} \DecValTok{2}\NormalTok{,}
+                \DataTypeTok{alpha =} \FloatTok{0.8}\NormalTok{) }\OperatorTok{+}
+\StringTok{    }\KeywordTok{geom_path}\NormalTok{(}\DataTypeTok{mapping =} \KeywordTok{aes}\NormalTok{(}\DataTypeTok{y =}\NormalTok{ Beta, }\DataTypeTok{x =}\NormalTok{ Iteration),}
+                \DataTypeTok{alpha =} \FloatTok{0.85}\NormalTok{) }\OperatorTok{+}
+\StringTok{    }\KeywordTok{facet_wrap}\NormalTok{(}\OperatorTok{~}\StringTok{ }\NormalTok{J, }\DataTypeTok{ncol =} \DecValTok{2}\NormalTok{, }\DataTypeTok{scales =} \StringTok{"free"}\NormalTok{) }\OperatorTok{+}
+\StringTok{    }\KeywordTok{theme_minimal}\NormalTok{()}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{replication_files/figure-latex/plot-mcmc-trace-big-1.pdf}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{geweke.diag}\NormalTok{(}\KeywordTok{cbind}\NormalTok{(plot_samples_hier_}\DecValTok{5}\NormalTok{,}
+\NormalTok{                plot_samples_hier_}\DecValTok{10}\NormalTok{,}
+\NormalTok{                plot_samples_hier_}\DecValTok{50}\NormalTok{,}
+\NormalTok{                plot_samples_hier_}\DecValTok{100}\NormalTok{,}
+\NormalTok{                plot_samples_alt))}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## Warning in cbind(plot_samples_hier_5, plot_samples_hier_10,
+## plot_samples_hier_50, : number of rows of result is not a multiple of vector
+## length (arg 1)
+\end{verbatim}
+
+\begin{verbatim}
+## 
+## Fraction in 1st window = 0.1
+## Fraction in 2nd window = 0.5 
+## 
+##   plot_samples_hier_5  plot_samples_hier_10  plot_samples_hier_50 
+##             -0.347998             -0.004298              0.037246 
+## plot_samples_hier_100      plot_samples_alt 
+##             -0.159882             -1.389440
+\end{verbatim}
+
+\end{document}
